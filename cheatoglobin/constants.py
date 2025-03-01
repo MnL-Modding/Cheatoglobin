@@ -11,7 +11,7 @@ NDS_SAVE_FILENAME_FILTER = "NDS Save Files (*.sav *.SaveRAM);;All Files (*)"
 PLAYER_NAMES = (
     "MARIO",
     "LUIGI",
-    "KOOPA"
+    "BOWSER"
 )
 
 PLAYER_COLORS = ( # light, med, dark
@@ -33,10 +33,28 @@ STAT_NAMES = ((
     ), (
         "LV",
         "EXP",
+        "NEXT",
     ), (
         "Gear Slot 1",
         "Gear Slot 2",
         "Gear Slot 3",
+    )
+)
+
+STAT_NAMES_LANG = ((
+        ("HP:", "HP:", "HP:"),
+        ("SP:", "SP:", "SP:"),
+        ("POW:", "POW:", "POW:"),
+        ("DEF:", "DEF:", "DEF:"),
+        ("SPEED:", "SPEED:", "SPEED:"),
+        ("STACHE:", "STACHE:", "HORN:"),
+    ), (
+        ("HP:", "HP:", "HP:"),
+        ("SP:", "SP:", "SP:"),
+    ), (
+        "LV:",
+        "EXP:",
+        "NEXT LV:",
     )
 )
 

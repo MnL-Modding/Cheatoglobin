@@ -4,11 +4,12 @@ from functools import partial
 from cheatoglobin.constants import *
 
 class PlayerInventoryTab(QtWidgets.QScrollArea):
-    def __init__(self, parent):
+    def __init__(self, parent, has_rom):
         super().__init__()
 
         self.inventory_data = None
         self.parent = parent
+        self.has_rom = has_rom
 
         # ======================================================================================================================
 
@@ -28,20 +29,19 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         coin_count_layout.addWidget(padding)
         padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        coin_count_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_COIN.png"))
-        coin_count_icon = QtWidgets.QLabel()
-        coin_count_icon.setPixmap(coin_count_icon_tex)
-        coin_count_icon.setFixedWidth(16)
-        coin_count_layout.addWidget(coin_count_icon)
+        if self.has_rom:
+            coin_count_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_COIN.png"))
+            coin_count_icon = QtWidgets.QLabel()
+            coin_count_icon.setPixmap(coin_count_icon_tex)
+            coin_count_icon.setFixedWidth(coin_count_icon_tex.width())
+            coin_count_layout.addWidget(coin_count_icon)
 
         coin_count_label = QtWidgets.QLabel("Total &Coins:")
-        #coin_count_label.setFixedWidth(64)
         coin_count_layout.addWidget(coin_count_label, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
         self.coin_count_box = QtWidgets.QSpinBox()
         self.coin_count_box.setMaximum(999999)
         self.coin_count_box.textChanged.connect(partial(self.change_data, 0, 0))
-        # self.coin_count_box.textChanged.connect(partial(self.change_data, current_player, stat))
         coin_count_label.setBuddy(self.coin_count_box)
         coin_count_layout.addWidget(self.coin_count_box, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
@@ -72,11 +72,14 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_item_layout = QtWidgets.QHBoxLayout(current_item)
             current_item_layout.setContentsMargins(0, 0, 0, 0)
 
-            current_item_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_{item[0]}.png"))
-            current_item_icon = QtWidgets.QLabel()
-            current_item_icon.setPixmap(current_item_icon_tex)
-            current_item_icon.setFixedWidth(16)
-            current_item_layout.addWidget(current_item_icon)
+            if self.has_rom:
+                current_item_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_{item[0]}.png"))
+                current_item_icon = QtWidgets.QLabel()
+                current_item_icon.setPixmap(current_item_icon_tex)
+                current_item_icon.setFixedWidth(current_item_icon_tex.width())
+                current_item_layout.addWidget(current_item_icon)
+            else:
+                current_item_icon = QtWidgets.QLabel("")
 
             current_item_name = QtWidgets.QLabel(item[1])
             current_item_layout.addWidget(current_item_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -113,11 +116,14 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_gear_layout = QtWidgets.QHBoxLayout(current_gear)
             current_gear_layout.setContentsMargins(0, 0, 0, 0)
 
-            current_gear_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"GEAR_{gear[0]}.png"))
-            current_gear_icon = QtWidgets.QLabel()
-            current_gear_icon.setPixmap(current_gear_icon_tex)
-            current_gear_icon.setFixedWidth(16)
-            current_gear_layout.addWidget(current_gear_icon)
+            if self.has_rom:
+                current_gear_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"GEAR_{gear[0]}.png"))
+                current_gear_icon = QtWidgets.QLabel()
+                current_gear_icon.setPixmap(current_gear_icon_tex)
+                current_gear_icon.setFixedWidth(current_gear_icon_tex.width())
+                current_gear_layout.addWidget(current_gear_icon)
+            else:
+                current_gear_icon = QtWidgets.QLabel("")
 
             current_gear_name = QtWidgets.QLabel(gear[1])
             current_gear_layout.addWidget(current_gear_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)

@@ -4,7 +4,7 @@ from cheatoglobin.player_stats_tab import PlayerStatsTab
 from cheatoglobin.player_inventory_tab import PlayerInventoryTab
 
 class SaveFileTab(QtWidgets.QTabWidget):
-    def __init__(self, parent, tab_parent, name):
+    def __init__(self, parent, tab_parent, name, has_rom):
         super().__init__()
 
         self.parent = parent
@@ -15,8 +15,8 @@ class SaveFileTab(QtWidgets.QTabWidget):
 
         # category selector
 
-        self.player_stats_tab = PlayerStatsTab(self)
-        self.player_inventory_tab = PlayerInventoryTab(self)
+        self.player_stats_tab = PlayerStatsTab(self, has_rom)
+        self.player_inventory_tab = PlayerInventoryTab(self, has_rom)
         
         self.addTab(self.player_stats_tab, "Player &Stats")
         self.addTab(self.player_inventory_tab, "&Inventory")

@@ -13,6 +13,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(f"No Currently Opened File - {APP_DISPLAY_NAME}")
         self.setWindowIcon(QtGui.QIcon(str(FILES_DIR / 'cheatoglobin.ico')))
 
+        self.has_rom = False
+
         menu_bar = self.menuBar()
         menu_bar_file = menu_bar.addMenu("&File")
         menu_bar_file.addAction(
@@ -43,8 +45,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         file_tabs = QtWidgets.QTabWidget()
 
-        self.file_1_tab = SaveFileTab(self, file_tabs, "Save Slot &1")
-        self.file_2_tab = SaveFileTab(self, file_tabs, "Save Slot &2")
+        self.file_1_tab = SaveFileTab(self, file_tabs, "Save Slot &1", self.has_rom)
+        self.file_2_tab = SaveFileTab(self, file_tabs, "Save Slot &2", self.has_rom)
 
         file_tabs.addTab(self.file_1_tab, self.file_1_tab.name)
         file_tabs.addTab(self.file_2_tab, self.file_1_tab.name)
