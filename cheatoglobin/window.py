@@ -10,32 +10,32 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.setWindowTitle("No Currently Opened File - Cheatoglobin")
+        self.setWindowTitle(f"No Currently Opened File - {APP_DISPLAY_NAME}")
         self.setWindowIcon(QtGui.QIcon(str(FILES_DIR / 'cheatoglobin.ico')))
 
         menu_bar = self.menuBar()
-        menu_bar_file = menu_bar.addMenu("File")
-
-        menu_bar_file_open = QtGui.QAction("Open", self)
-        menu_bar_file_open.setShortcut(QtGui.QKeySequence("Ctrl+O"))
-        menu_bar_file_open.triggered.connect(self.import_files)
-        menu_bar_file.addAction(menu_bar_file_open)
-
-        menu_bar_file_save = QtGui.QAction("Save", self)
-        menu_bar_file_save.setShortcut(QtGui.QKeySequence("Ctrl+S"))
-        menu_bar_file_save.triggered.connect(self.export_files)
-        menu_bar_file.addAction(menu_bar_file_save)
-
-        menu_bar_file_save_as = QtGui.QAction("Save as...", self)
-        menu_bar_file_save_as.triggered.connect(self.export_files_as)
-        menu_bar_file.addAction(menu_bar_file_save_as)
-
-        # menu_bar_file.addSeparator() # -----------------------------------------
-
-        # menu_bar_file_quit = QtGui.QAction("Quit", self) 
-        # menu_bar_file_quit.setMenuRole(QtGui.QAction.QuitRole)
-        # menu_bar_file_open.triggered.connect(QtCore.QCoreApplication.instance().quit)
-        # menu_bar_file.addAction(menu_bar_file_quit)
+        menu_bar_file = menu_bar.addMenu("&File")
+        menu_bar_file.addAction(
+            "&Open",
+            QtGui.QKeySequence.StandardKey.Open,
+            self.import_files,
+        )
+        menu_bar_file.addAction(
+            "&Save",
+            QtGui.QKeySequence.StandardKey.Save,
+            self.export_files,
+        )
+        menu_bar_file.addAction(
+            "Save &As...",
+            QtGui.QKeySequence.StandardKey.SaveAs,
+            self.export_files_as,
+        )
+        menu_bar_file.addSeparator() # -----------------------------------------
+        menu_bar_file.addAction(
+            "&Quit",
+            QtGui.QKeySequence.StandardKey.Quit,
+            QtWidgets.QApplication.quit,
+        )
 
         # ======================================================================================================================
 
@@ -43,8 +43,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         file_tabs = QtWidgets.QTabWidget()
 
-        self.file_1_tab = SaveFileTab(self, file_tabs, "Save Slot 1")
-        self.file_2_tab = SaveFileTab(self, file_tabs, "Save Slot 2")
+        self.file_1_tab = SaveFileTab(self, file_tabs, "Save Slot &1")
+        self.file_2_tab = SaveFileTab(self, file_tabs, "Save Slot &2")
 
         file_tabs.addTab(self.file_1_tab, self.file_1_tab.name)
         file_tabs.addTab(self.file_2_tab, self.file_1_tab.name)
@@ -57,28 +57,29 @@ class MainWindow(QtWidgets.QMainWindow):
             f"Please choose a Bowser's Inside Story Save File to open.",
         )
 
-        self.import_files()
+        if not self.import_files():
+            sys.exit(2)
     
     def import_files(self):
         file_path, _selected_filter = QtWidgets.QFileDialog.getOpenFileName(
             parent=self,
             caption="Open Save File",
-            filter="NDS Save Files (*.sav *.SaveRAM);;All Files (*)",
+            filter=NDS_SAVE_FILENAME_FILTER,
         )
         if file_path == '':
-            sys.exit(2)
+            return False
             
-        self.setWindowTitle(f"{os.path.basename(file_path)} - Cheatoglobin")
+        self.setWindowTitle(f"{os.path.basename(file_path)} - {APP_DISPLAY_NAME}")
         self.current_path = file_path
         
         with open(file_path, 'rb') as save_file:
-            if save_file.read(6) != bytearray("MLRPG3", 'cp1252'):
+            if save_file.read(6) != b"MLRPG3":
                 QtWidgets.QMessageBox.warning(
                     self,
                     "Invalid File",
                     f"The chosen file is not a Bowser's Inside Story Save File.",
                 )
-                sys.exit(2)
+                return False
             
             slot_offsets = (0x0010, 0x0FE8)
             save_data_set = []
@@ -120,17 +121,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.file_2_tab.set_data(save_data_set[1])
 
             save_file.seek(0)
-            self.preserved_file = bytearray(save_file.read())
+            self.preserved_file = save_file.read()
 
         self.file_1_tab.set_edited(False)
         self.file_2_tab.set_edited(False)
+
+        return True
         
     def export_files_as(self):
         file_path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            "Save .sav File",
-            self.current_path,
-            "NDS Save Files (*.sav *.SaveRAM);;All Files (*)",
+            parent=self,
+            caption="Save .sav File",
+            dir=self.current_path,
+            filter=NDS_SAVE_FILENAME_FILTER,
         )
 
         if file_path == '':
@@ -179,6 +182,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 # ---------------------------------------------------------
 
                 save_file.seek(slot_offsets[current_slot])
-                backup_file = bytearray(save_file.read(0x5F4))
+                backup_file = save_file.read(0x5F4)
                 save_file.seek(slot_offsets[current_slot] + 0x7EC)
                 save_file.write(backup_file)

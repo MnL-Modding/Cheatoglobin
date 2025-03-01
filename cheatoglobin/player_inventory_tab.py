@@ -34,14 +34,15 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         coin_count_icon.setFixedWidth(16)
         coin_count_layout.addWidget(coin_count_icon)
 
-        coin_count_label = QtWidgets.QLabel("Total Coins:")
+        coin_count_label = QtWidgets.QLabel("Total &Coins:")
         #coin_count_label.setFixedWidth(64)
         coin_count_layout.addWidget(coin_count_label, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
-        
+
         self.coin_count_box = QtWidgets.QSpinBox()
         self.coin_count_box.setMaximum(999999)
         self.coin_count_box.textChanged.connect(partial(self.change_data, 0, 0))
         # self.coin_count_box.textChanged.connect(partial(self.change_data, current_player, stat))
+        coin_count_label.setBuddy(self.coin_count_box)
         coin_count_layout.addWidget(self.coin_count_box, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
         padding = QtWidgets.QWidget()

@@ -3,6 +3,11 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 FILES_DIR = SCRIPT_DIR / 'files'
 
+APP_NAME = "cheatoglobin"
+APP_DISPLAY_NAME = "Cheatoglobin"
+
+NDS_SAVE_FILENAME_FILTER = "NDS Save Files (*.sav *.SaveRAM);;All Files (*)"
+
 PLAYER_NAMES = (
     "MARIO",
     "LUIGI",

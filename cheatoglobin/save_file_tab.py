@@ -18,8 +18,8 @@ class SaveFileTab(QtWidgets.QTabWidget):
         self.player_stats_tab = PlayerStatsTab(self)
         self.player_inventory_tab = PlayerInventoryTab(self)
         
-        self.addTab(self.player_stats_tab, "Player Stats")
-        self.addTab(self.player_inventory_tab, "Inventory")
+        self.addTab(self.player_stats_tab, "Player &Stats")
+        self.addTab(self.player_inventory_tab, "&Inventory")
     
     def set_data(self, data):
         self.player_stats_tab.stats_data = data.player_stats

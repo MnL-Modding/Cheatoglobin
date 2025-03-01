@@ -1,0 +1,4 @@
+- module-name: "cheatoglobin"
+  data-files:
+    dirs:
+      - "files"
