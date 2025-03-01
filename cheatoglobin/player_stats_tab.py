@@ -231,7 +231,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
             current_rank_icon = QtWidgets.QLabel()
             current_rank_icon.setPixmap(current_rank_icon_tex)
             self.current_rank_icons.append(current_rank_icon)
-            level_info_layout.addWidget(current_rank_icon, 0, 2, 3, 1, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
+            level_info_layout.addWidget(current_rank_icon, 0, 2, 3, 1, alignment = QtCore.Qt.AlignmentFlag.AlignCenter)
 
             player_stats_layout.addWidget(level_info)
 
