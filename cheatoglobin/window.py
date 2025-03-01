@@ -13,7 +13,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(f"No Currently Opened File - {APP_DISPLAY_NAME}")
         self.setWindowIcon(QtGui.QIcon(str(FILES_DIR / 'cheatoglobin.ico')))
 
-        self.has_rom = False
+        self.has_rom = True
 
         menu_bar = self.menuBar()
         menu_bar_file = menu_bar.addMenu("&File")
