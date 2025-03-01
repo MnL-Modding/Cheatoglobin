@@ -32,7 +32,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
             player_stats = QtWidgets.QFrame()
             player_stats.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
             player_stats.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
-            player_stats.setFixedWidth(240)
+            #player_stats.setFixedWidth(240)
             player_stats_layout = QtWidgets.QVBoxLayout(player_stats)
 
             player_color = player_stats.palette()
@@ -66,7 +66,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 base_stat_layout.setContentsMargins(0, 0, 0, 0)
 
                 base_stat_text = QtWidgets.QLabel("Base")
-                base_stat_text.setFixedWidth(24)
+                #base_stat_text.setFixedWidth(24)
                 base_stat_text.setStyleSheet("color: #000000;") 
                 base_stat_layout.addWidget(base_stat_text)
 
@@ -88,12 +88,12 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 base_stat_layout.addWidget(base_stat_box)
 
                 base_stat_plus = QtWidgets.QLabel("+")
-                base_stat_plus.setFixedWidth(6)
+                #base_stat_plus.setFixedWidth(6)
                 base_stat_plus.setStyleSheet("color: #000000;") 
                 base_stat_layout.addWidget(base_stat_plus)
 
                 base_stat_additive = QtWidgets.QLabel(str(0))
-                base_stat_additive.setFixedWidth(20)
+                #base_stat_additive.setFixedWidth(20)
                 base_stat_additive.setStyleSheet("color: #000000;")
                 base_stat_layout.addWidget(base_stat_additive)
 
@@ -121,7 +121,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 current_stat_layout.setContentsMargins(0, 0, 0, 0)
 
                 current_stat_text = QtWidgets.QLabel("Current")
-                current_stat_text.setFixedWidth(40)
+                #current_stat_text.setFixedWidth(40)
                 current_stat_text.setStyleSheet("color: #000000;")
                 current_stat_layout.addWidget(current_stat_text)
 
@@ -143,12 +143,12 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 current_stat_layout.addWidget(current_stat_box)
 
                 current_stat_slash = QtWidgets.QLabel("/")
-                current_stat_slash.setFixedWidth(6)
+                #current_stat_slash.setFixedWidth(6)
                 current_stat_slash.setStyleSheet("color: #000000;")
                 current_stat_layout.addWidget(current_stat_slash)
 
                 current_stat_total = QtWidgets.QLabel(str(0))
-                current_stat_total.setFixedWidth(20)
+                #current_stat_total.setFixedWidth(20)
                 current_stat_total.setStyleSheet("color: #000000;")
                 current_stat_layout.addWidget(current_stat_total)
 
