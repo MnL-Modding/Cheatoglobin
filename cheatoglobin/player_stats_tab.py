@@ -403,7 +403,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 if gear.currentIndex() in problem_list:
                     gear.setStyleSheet("color: #FF6666;")
                 else:
-                    gear.setStyleSheet("color: #FFFFFF;")
+                    gear.setStyleSheet("")
                 for j in range(len(GEAR_DATA)):
                     if j in problem_list:
                         gear.setItemData(j, QtGui.QColor(255, 0, 0, 120), QtCore.Qt.BackgroundRole)
