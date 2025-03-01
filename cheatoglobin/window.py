@@ -94,7 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 for current_player in range(3): # mario stats, luigi stats, bowser stats
                     current_save_slot_data.player_stats[current_player].extend(struct.unpack('<8hb', save_file.read(0x11)))
                     current_save_slot_data.player_stats[current_player].append(struct.unpack('<i', save_file.read(0x03) + bytes(1))[0]) # EXP being a bitch
-                    current_save_slot_data.player_stats[current_player].extend(struct.unpack('<3b', save_file.read(0x03)))
+                    current_save_slot_data.player_stats[current_player].extend(struct.unpack('<3B', save_file.read(0x03)))
                     ## ?? BB ?? ?? ??
                     ## BB = currently equipped badge (04 for bowser ig)
                     save_file.seek(5, 1)
@@ -159,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 for current_player in range(3): # mario stats, luigi stats, bowser stats
                     save_file.write(struct.pack('<8hb', *current_save_slot_data[current_slot].player_stats[current_player][:9]))
                     save_file.write(current_save_slot_data[current_slot].player_stats[current_player][9].to_bytes(3, 'little')) # EXP being a bitch
-                    save_file.write(struct.pack('<3b', *current_save_slot_data[current_slot].player_stats[current_player][10:]))
+                    save_file.write(struct.pack('<3B', *current_save_slot_data[current_slot].player_stats[current_player][10:]))
                     save_file.seek(5, 1)
 
                 # player inventory data
