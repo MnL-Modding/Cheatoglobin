@@ -1,0 +1,1 @@
+from cheatoglobin.main import main as main
