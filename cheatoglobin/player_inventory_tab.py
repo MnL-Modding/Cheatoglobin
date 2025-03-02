@@ -20,6 +20,8 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         self.setWidget(main)
         self.setWidgetResizable(True)
 
+        self.labels_that_need_item_sprites = []
+
         # coin count
 
         coin_count = QtWidgets.QWidget()
@@ -31,17 +33,8 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         if self.has_rom:
-            coin_count_icon_tex = create_MObj_sprite(
-                parent.parent.overlay_MObj_offsets,
-                parent.parent.overlay_MObj,
-                parent.parent.MObj_file,
-                145,
-                0,
-                parent.parent.lang)
-            coin_count_icon = QtWidgets.QLabel()
-            coin_count_icon.setPixmap(coin_count_icon_tex)
-            coin_count_icon.setFixedWidth(coin_count_icon_tex.width())
-            coin_count_layout.addWidget(coin_count_icon)
+            self.coin_count_icon = QtWidgets.QLabel()
+            coin_count_layout.addWidget(self.coin_count_icon)
 
         coin_count_label = QtWidgets.QLabel("Total &Coins:")
         coin_count_layout.addWidget(coin_count_label, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -80,16 +73,8 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_item_layout.setContentsMargins(0, 0, 0, 0)
 
             if self.has_rom:
-                current_item_icon_tex = create_MObj_sprite(
-                    parent.parent.overlay_MObj_offsets,
-                    parent.parent.overlay_MObj,
-                    parent.parent.MObj_file,
-                    9,
-                    item[0] * 2,
-                    parent.parent.lang)
                 current_item_icon = QtWidgets.QLabel()
-                current_item_icon.setPixmap(current_item_icon_tex)
-                current_item_icon.setFixedWidth(current_item_icon_tex.width())
+                self.labels_that_need_item_sprites.append((current_item_icon, item[0]))
                 current_item_layout.addWidget(current_item_icon)
             else:
                 current_item_icon = QtWidgets.QLabel("")
@@ -130,16 +115,8 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_gear_layout.setContentsMargins(0, 0, 0, 0)
 
             if self.has_rom:
-                current_gear_icon_tex = create_MObj_sprite(
-                    parent.parent.overlay_MObj_offsets,
-                    parent.parent.overlay_MObj,
-                    parent.parent.MObj_file,
-                    9,
-                    gear[0] * 2,
-                    parent.parent.lang)
                 current_gear_icon = QtWidgets.QLabel()
-                current_gear_icon.setPixmap(current_gear_icon_tex)
-                current_gear_icon.setFixedWidth(current_gear_icon_tex.width())
+                self.labels_that_need_item_sprites.append((current_gear_icon, gear[0]))
                 current_gear_layout.addWidget(current_gear_icon)
             else:
                 current_gear_icon = QtWidgets.QLabel("")
@@ -158,7 +135,37 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         
         main_layout.addWidget(gear_counts)
 
+        self.assign_sprites()
+
         # --------------------------------------------------------
+    
+    def assign_sprites(self):
+        if not self.has_rom:
+            return
+
+        coin_count_tex = create_MObj_sprite(
+            self.parent.parent.overlay_MObj_offsets,
+            self.parent.parent.overlay_MObj,
+            self.parent.parent.MObj_file,
+            145,
+            0,
+            self.parent.parent.lang)
+        self.coin_count_icon.setPixmap(coin_count_tex)
+        self.coin_count_icon.setFixedWidth(coin_count_tex.width())
+
+        item_sprite_cache = {}
+        for item in self.labels_that_need_item_sprites:
+            if item[1] not in item_sprite_cache:
+                item_sprite_cache[item[1]] = create_MObj_sprite(
+                self.parent.parent.overlay_MObj_offsets,
+                self.parent.parent.overlay_MObj,
+                self.parent.parent.MObj_file,
+                9,
+                item[1] * 2,
+                self.parent.parent.lang)
+
+            item[0].setPixmap(item_sprite_cache[item[1]])
+            item[0].setFixedWidth(item_sprite_cache[item[1]].width())
     
     def change_data(self, data_type, stat, value):
         self.parent.set_edited(True)
@@ -167,18 +174,28 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         self.set_data()
     
     def set_data(self):
+        self.coin_count_box.blockSignals(True)
         self.coin_count_box.setValue(self.inventory_data[0][0])
+        self.coin_count_box.blockSignals(False)
 
         for i in range(len(self.all_item_widget_sets)):
             item_widgets = self.all_item_widget_sets[i]
+
+            item_widgets[2].blockSignals(True)
 
             item_widgets[0].setEnabled(self.inventory_data[1][i] != 0)
             item_widgets[1].setEnabled(self.inventory_data[1][i] != 0)
             item_widgets[2].setValue(self.inventory_data[1][i])
 
+            item_widgets[2].blockSignals(False)
+
         for i in range(len(self.all_gear_widget_sets)):
             gear_widgets = self.all_gear_widget_sets[i]
+
+            gear_widgets[2].blockSignals(True)
 
             gear_widgets[0].setEnabled(self.inventory_data[2][i] != 0)
             gear_widgets[1].setEnabled(self.inventory_data[2][i] != 0)
             gear_widgets[2].setValue(self.inventory_data[2][i])
+
+            gear_widgets[2].blockSignals(False)

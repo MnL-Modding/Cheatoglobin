@@ -55,6 +55,7 @@ STAT_NAMES_LANG = ((
         "LV:",
         "EXP:",
         "NEXT LV:",
+        "RANK:",
     )
 )
 
@@ -65,6 +66,19 @@ RANK_LEVELS = (
     (6, 12, 18, 25, 40),
     (6, 12, 18, 25, 40),
     (10, 20, 40),
+)
+
+RANK_NAMES = (
+    "Mushroom Rank",
+    "Shell Rank",
+    "Flower Rank",
+    "Shine Rank",
+    "Star Rank",
+    "Rainbow Rank",
+    "Bronze Boss Rank",
+    "Silver Boss Rank",
+    "Gold Boss Rank",
+    "Final Boss Rank",
 )
 
 ITEM_DATA = (
