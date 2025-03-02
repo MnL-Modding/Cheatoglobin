@@ -1,6 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
+from cheatoglobin.image import create_MObj_sprite
 from cheatoglobin.constants import *
 
 class PlayerStatsTab(QtWidgets.QWidget):
@@ -41,7 +42,13 @@ class PlayerStatsTab(QtWidgets.QWidget):
             player_stats.setAutoFillBackground(True)
 
             if self.has_rom:
-                player_name_tex = QtGui.QPixmap(str(FILES_DIR / f"NAME_{PLAYER_NAMES[current_player]}.png"))
+                player_name_tex = create_MObj_sprite(
+                    parent.parent.overlay_MObj_offsets,
+                    parent.parent.overlay_MObj,
+                    parent.parent.MObj_file,
+                    2,
+                    current_player,
+                    parent.parent.lang)
                 player_name_tex = player_name_tex.scaled(player_name_tex.width() * 2, player_name_tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
                 player_name = QtWidgets.QLabel()
                 player_name.setPixmap(player_name_tex)
@@ -78,9 +85,31 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
                 if self.has_rom:
                     if (stat != 1 and stat != 5) or current_player != 2:
-                        base_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[0][stat]}.png"))
+                        base_stat_icon_tex = create_MObj_sprite(
+                            parent.parent.overlay_MObj_offsets,
+                            parent.parent.overlay_MObj,
+                            parent.parent.MObj_file,
+                            2,
+                            stat + 6,
+                            parent.parent.lang)
                     else:
-                        base_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[0][stat]}_1.png"))
+                        match stat:
+                            case 1:
+                                base_stat_icon_tex = create_MObj_sprite(
+                                    parent.parent.overlay_MObj_offsets,
+                                    parent.parent.overlay_MObj,
+                                    parent.parent.MObj_file,
+                                    2,
+                                    13,
+                                    parent.parent.lang)
+                            case 5:
+                                base_stat_icon_tex = create_MObj_sprite(
+                                    parent.parent.overlay_MObj_offsets,
+                                    parent.parent.overlay_MObj,
+                                    parent.parent.MObj_file,
+                                    2,
+                                    12,
+                                    parent.parent.lang)
                     base_stat_icon = QtWidgets.QLabel()
                     base_stat_icon.setPixmap(base_stat_icon_tex)
                 else:
@@ -137,9 +166,21 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
                 if self.has_rom:
                     if stat != 1 or current_player != 2:
-                        current_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[1][stat]}.png"))
+                        current_stat_icon_tex = create_MObj_sprite(
+                            parent.parent.overlay_MObj_offsets,
+                            parent.parent.overlay_MObj,
+                            parent.parent.MObj_file,
+                            2,
+                            stat + 6,
+                            parent.parent.lang)
                     else:
-                        current_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[1][stat]}_1.png"))
+                        current_stat_icon_tex = create_MObj_sprite(
+                            parent.parent.overlay_MObj_offsets,
+                            parent.parent.overlay_MObj,
+                            parent.parent.MObj_file,
+                            2,
+                            13,
+                            parent.parent.lang)
                     current_stat_icon = QtWidgets.QLabel()
                     current_stat_icon.setPixmap(current_stat_icon_tex)
                 else:
@@ -189,7 +230,13 @@ class PlayerStatsTab(QtWidgets.QWidget):
             # LV
 
             if self.has_rom:
-                current_level_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[2][0]}.png"))
+                current_level_icon_tex = create_MObj_sprite(
+                    parent.parent.overlay_MObj_offsets,
+                    parent.parent.overlay_MObj,
+                    parent.parent.MObj_file,
+                    2,
+                    3,
+                    parent.parent.lang)
                 current_level_icon = QtWidgets.QLabel()
                 current_level_icon.setPixmap(current_level_icon_tex)
             else:
@@ -208,7 +255,13 @@ class PlayerStatsTab(QtWidgets.QWidget):
             # EXP
 
             if self.has_rom:
-                current_exp_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[2][1]}.png"))
+                current_exp_icon_tex = create_MObj_sprite(
+                    parent.parent.overlay_MObj_offsets,
+                    parent.parent.overlay_MObj,
+                    parent.parent.MObj_file,
+                    2,
+                    4,
+                    parent.parent.lang)
                 current_exp_icon = QtWidgets.QLabel()
                 current_exp_icon.setPixmap(current_exp_icon_tex)
             else:
@@ -226,7 +279,13 @@ class PlayerStatsTab(QtWidgets.QWidget):
             # NEXT
 
             if self.has_rom:
-                next_exp_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[2][2]}.png"))
+                next_exp_icon_tex = create_MObj_sprite(
+                    parent.parent.overlay_MObj_offsets,
+                    parent.parent.overlay_MObj,
+                    parent.parent.MObj_file,
+                    2,
+                    5,
+                    parent.parent.lang)
                 next_exp_icon = QtWidgets.QLabel()
                 next_exp_icon.setPixmap(next_exp_icon_tex)
             else:
@@ -280,7 +339,13 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
                 for gear in GEAR_DATA:
                     if self.has_rom:
-                        current_gear_box.addItem(QtGui.QIcon(str(FILES_DIR / f"GEAR_{gear[0]}.png")), gear[1])
+                        current_gear_box.addItem(create_MObj_sprite(
+                            parent.parent.overlay_MObj_offsets,
+                            parent.parent.overlay_MObj,
+                            parent.parent.MObj_file,
+                            9,
+                            gear[0] * 2,
+                            parent.parent.lang), gear[1])
                     else:
                         current_gear_box.addItem(gear[1])
                 current_gear_box.currentIndexChanged.connect(partial(self.change_data, current_player, stat + 10))
@@ -421,7 +486,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 problem_list = []
                 for j in range(len(GEAR_DATA)):
                     for k in gear_to_compare:
-                        if (GEAR_DATA[j][0] == GEAR_DATA[k][0] and GEAR_DATA[j][0] != "NONE") or (GEAR_DATA[j][0] in GEAR_DISALLOWED_LIST[current_player]):
+                        if (GEAR_DATA[j][0] == GEAR_DATA[k][0] and GEAR_DATA[j][0] != 2) or (GEAR_DATA[j][0] in GEAR_DISALLOWED_LIST[current_player]):
                             if j not in problem_list:
                                 problem_list.append(j)
                 if gear.currentIndex() in problem_list:

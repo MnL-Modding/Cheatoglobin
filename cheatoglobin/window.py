@@ -2,6 +2,7 @@ import os
 import sys
 import struct
 from PySide6 import QtCore, QtGui, QtWidgets
+import ndspy.rom
 
 from cheatoglobin.constants import *
 from cheatoglobin.save_file_tab import SaveFileTab, SaveData
@@ -13,7 +14,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(f"No Currently Opened File - {APP_DISPLAY_NAME}")
         self.setWindowIcon(QtGui.QIcon(str(FILES_DIR / 'cheatoglobin.ico')))
 
-        self.has_rom = True
+        self.lang = 1
+
+        self.has_rom = False
+        self.import_rom()
 
         menu_bar = self.menuBar()
         menu_bar_file = menu_bar.addMenu("&File")
@@ -187,3 +191,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 backup_file = save_file.read(0x5F4)
                 save_file.seek(slot_offsets[current_slot] + 0x7EC)
                 save_file.write(backup_file)
+
+    def import_rom(self): # TO DO: make the user be able to import other ROMs or whatever, do what spritoglobin does
+        self.has_rom = True
+
+        path = "BISROM.nds"
+        rom = ndspy.rom.NintendoDSRom.fromFile(path)
+
+        if rom.idCode[3] == 69 or rom.idCode[3] == 80:                                                               # US-base
+            self.overlay_MObj = rom.loadArm9Overlays([132])[132].data
+            self.overlay_MObj_offsets = (0x20F0, 0x2E94, 0x2C80) # filedata, sprite groups, palette groups
+        else:                                                                                                        # JP-base
+            self.overlay_MObj = rom.loadArm9Overlays([126])[126].data
+            self.overlay_MObj_offsets = (0x209C, 0x2DA0, 0x2BA0) # filedata, sprite groups, palette groups
+        
+        self.MObj_file = rom.getFileByName('MObj/MObj.dat')

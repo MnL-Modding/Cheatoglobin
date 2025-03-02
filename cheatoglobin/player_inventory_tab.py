@@ -1,6 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
+from cheatoglobin.image import create_MObj_sprite
 from cheatoglobin.constants import *
 
 class PlayerInventoryTab(QtWidgets.QScrollArea):
@@ -30,7 +31,13 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         if self.has_rom:
-            coin_count_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_COIN.png"))
+            coin_count_icon_tex = create_MObj_sprite(
+                parent.parent.overlay_MObj_offsets,
+                parent.parent.overlay_MObj,
+                parent.parent.MObj_file,
+                145,
+                0,
+                parent.parent.lang)
             coin_count_icon = QtWidgets.QLabel()
             coin_count_icon.setPixmap(coin_count_icon_tex)
             coin_count_icon.setFixedWidth(coin_count_icon_tex.width())
@@ -73,7 +80,13 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_item_layout.setContentsMargins(0, 0, 0, 0)
 
             if self.has_rom:
-                current_item_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_{item[0]}.png"))
+                current_item_icon_tex = create_MObj_sprite(
+                    parent.parent.overlay_MObj_offsets,
+                    parent.parent.overlay_MObj,
+                    parent.parent.MObj_file,
+                    9,
+                    item[0] * 2,
+                    parent.parent.lang)
                 current_item_icon = QtWidgets.QLabel()
                 current_item_icon.setPixmap(current_item_icon_tex)
                 current_item_icon.setFixedWidth(current_item_icon_tex.width())
@@ -117,7 +130,13 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_gear_layout.setContentsMargins(0, 0, 0, 0)
 
             if self.has_rom:
-                current_gear_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"GEAR_{gear[0]}.png"))
+                current_gear_icon_tex = create_MObj_sprite(
+                    parent.parent.overlay_MObj_offsets,
+                    parent.parent.overlay_MObj,
+                    parent.parent.MObj_file,
+                    9,
+                    gear[0] * 2,
+                    parent.parent.lang)
                 current_gear_icon = QtWidgets.QLabel()
                 current_gear_icon.setPixmap(current_gear_icon_tex)
                 current_gear_icon.setFixedWidth(current_gear_icon_tex.width())
