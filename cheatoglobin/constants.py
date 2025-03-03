@@ -270,3 +270,8 @@ BADGE_NAMES = (
     "Excellent! Badge",
     "Excellent!! Badge",
 )
+
+BADGE_PENALTIES = (
+    20,  0,  0, 40,
+    80, 20,  0,  0,
+)

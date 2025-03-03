@@ -12,8 +12,6 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         self.parent = parent
         self.has_rom = has_rom
 
-        # ======================================================================================================================
-
         main = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout(main)
         
@@ -21,6 +19,8 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         self.setWidgetResizable(True)
 
         self.labels_that_need_item_sprites = []
+
+        # ======================================================================================================================
 
         # coin count
 
@@ -82,10 +82,15 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_item_name = QtWidgets.QLabel(item[1])
             current_item_layout.addWidget(current_item_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
             
+            line = QtWidgets.QFrame()
+            line.setFrameShape(QtWidgets.QFrame.HLine)
+            line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            line.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            current_item_layout.addWidget(line)
+            
             current_item_box = QtWidgets.QSpinBox()
             current_item_box.setMaximum(99)
             current_item_box.textChanged.connect(partial(self.change_data, 1, i))
-            # current_item_box.textChanged.connect(partial(self.change_data, current_player, stat))
             current_item_layout.addWidget(current_item_box, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
 
             item_counts_layout.addWidget(current_item, i // 4, i % 4)
@@ -123,11 +128,16 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
 
             current_gear_name = QtWidgets.QLabel(gear[1])
             current_gear_layout.addWidget(current_gear_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+            line = QtWidgets.QFrame()
+            line.setFrameShape(QtWidgets.QFrame.HLine)
+            line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            line.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            current_gear_layout.addWidget(line)
             
             current_gear_box = QtWidgets.QSpinBox()
             current_gear_box.setMaximum(9)
             current_gear_box.textChanged.connect(partial(self.change_data, 2, i))
-            # current_gear_box.textChanged.connect(partial(self.change_data, current_player, stat))
             current_gear_layout.addWidget(current_gear_box, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
 
             gear_counts_layout.addWidget(current_gear, i // 4, i % 4)
@@ -135,9 +145,9 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         
         main_layout.addWidget(gear_counts)
 
-        self.assign_sprites()
-
         # --------------------------------------------------------
+
+        self.assign_sprites()
     
     def assign_sprites(self):
         if not self.has_rom:

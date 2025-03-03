@@ -1,6 +1,7 @@
 import os
 import sys
 import struct
+from random import choice
 from PySide6 import QtCore, QtGui, QtWidgets
 import ndspy.rom
 
@@ -15,6 +16,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon(str(FILES_DIR / 'cheatoglobin.ico')))
 
         self.lang = 1
+        self.rng = choice([0, 1]), choice([0, 1])
 
         self.has_rom = False
         self.import_rom()
@@ -99,25 +101,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 for current_player in range(3): # mario stats, luigi stats, bowser stats
                     current_save_slot_data.player_stats[current_player].extend(struct.unpack('<8hb', save_file.read(0x11)))
-                    current_save_slot_data.player_stats[current_player].append(struct.unpack('<i', save_file.read(0x03) + bytes(1))[0]) # EXP being a bitch
+                    current_save_slot_data.player_stats[current_player].append(int.from_bytes(save_file.read(3), "little")) # EXP being a bitch
                     current_save_slot_data.player_stats[current_player].extend(struct.unpack('<3B', save_file.read(0x03)))
-                    ## ?? BB ?? ?? ??
-                    ## BB = currently equipped badge (04 for bowser ig)
-                    save_file.seek(5, 1)
+                    save_file.seek(1, 1)
+                    current_save_slot_data.badge_data[0].append(int.from_bytes(save_file.read(1)))
+                    save_file.seek(3, 1)
 
                 # player inventory data
                 # ---------------------------------------------------------
                 save_file.seek(slot_offsets[current_slot] + 0x0054)
                 
-                current_save_slot_data.inventory[0][0] = struct.unpack('<i', save_file.read(0x04))[0] # coin count
+                current_save_slot_data.inventory[0][0] = int.from_bytes(save_file.read(4), "little") # coin count
                 current_save_slot_data.inventory[1].extend(struct.unpack('<26b', save_file.read(0x1A))) # item counts
                 ## ?? ?? ?? ?? ?? ?? ?? - nothing seems to affect anything here
                 save_file.seek(7, 1)
                 current_save_slot_data.inventory[2].extend(struct.unpack('<127b', save_file.read(0x7F))) # gear counts
-                save_file.seek(8, 1)
-                ## BB ?? ?? ?? TT TT TT TT
-                ## BB = owned badges (bitfield)
+                current_save_slot_data.badge_data[1] = int.from_bytes(save_file.read(1)) # badge collection bitfield
+                save_file.seek(11, 1)
+                ## ?? ?? ?? TT TT TT TT ?? ?? ?? ??
                 ## TT = game timer (in frames)
+                current_save_slot_data.badge_data[2].extend(struct.unpack('<2H', save_file.read(0x4))) # badge meters
 
                 # ---------------------------------------------------------
             

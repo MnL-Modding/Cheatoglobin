@@ -12,10 +12,6 @@ class PlayerStatsTab(QtWidgets.QWidget):
         self.parent = parent
         self.has_rom = has_rom
 
-        # ======================================================================================================================
-
-        # player stats
-
         main_layout = QtWidgets.QHBoxLayout(self)
 
         self.base_stat_boxes = ([], [], [])
@@ -32,8 +28,11 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
         self.labels_that_need_name_sprites = []
         self.labels_that_need_stat_sprites = []
-        self.labels_that_need_rank_sprites = []
         self.labels_that_need_item_sprites = []
+
+        # ======================================================================================================================
+
+        # player stats
 
         for current_player in range(3):
             player_stats = QtWidgets.QFrame()
@@ -51,7 +50,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 self.labels_that_need_name_sprites.append((player_name, current_player))
             else:
                 player_name = QtWidgets.QLabel(PLAYER_NAMES[current_player])
-                player_name.setStyleSheet("color: #000000;") 
+                player_name.setStyleSheet("color: #000000;")
                 font = QtGui.QFont()
                 font.setPointSize(player_name.font().pointSize() * 2)
                 player_name.setFont(font)
@@ -249,7 +248,6 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
             if self.has_rom:
                 current_rank_icon = QtWidgets.QLabel()
-                self.labels_that_need_rank_sprites.append([current_rank_icon, 0])
                 self.current_rank_icons.append(current_rank_icon)
                 level_info_layout.addWidget(current_rank_icon, 0, 2, 3, 1, alignment = QtCore.Qt.AlignmentFlag.AlignCenter)
             else:
@@ -300,9 +298,9 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
             main_layout.addWidget(player_stats)
 
-            self.assign_sprites()
-
             # --------------------------------------------------------
+
+            self.assign_sprites()
     
     def assign_rank_sprites(self, rank):
         tex = create_MObj_sprite(
@@ -310,7 +308,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
             self.parent.parent.overlay_MObj,
             self.parent.parent.MObj_file,
             229,
-            rank,
+            rank + 10,
             self.parent.parent.lang)
         tex = tex.scaled(tex.width() * 2, tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
         return tex
@@ -318,6 +316,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
     def assign_sprites(self):
         if not self.has_rom:
             return
+
         for label in self.labels_that_need_name_sprites:
             tex = create_MObj_sprite(
                 self.parent.parent.overlay_MObj_offsets,
@@ -458,7 +457,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 if self.stats_data[current_player][8] >= i:
                     rank += 1
             if self.has_rom:
-                self.current_rank_icons[current_player].setPixmap(self.assign_rank_sprites(rank + 10))
+                self.current_rank_icons[current_player].setPixmap(self.assign_rank_sprites(rank))
             else:
                 self.current_rank_icons[current_player].setText(RANK_NAMES[rank])
 
