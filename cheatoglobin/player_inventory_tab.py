@@ -96,6 +96,7 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             item_counts_layout.addWidget(current_item, i // 4, i % 4)
             self.all_item_widget_sets.append((current_item_icon, current_item_name, current_item_box))
         
+        main_layout.addWidget(QtWidgets.QLabel("Consumables Inventory:"))
         main_layout.addWidget(item_counts)
 
         # --------------------------------------------------------
@@ -143,6 +144,7 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             gear_counts_layout.addWidget(current_gear, i // 4, i % 4)
             self.all_gear_widget_sets.append((current_gear_icon, current_gear_name, current_gear_box))
         
+        main_layout.addWidget(QtWidgets.QLabel("Gear Inventory:"))
         main_layout.addWidget(gear_counts)
 
         # --------------------------------------------------------

@@ -116,7 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 ## ?? ?? ?? ?? ?? ?? ?? - nothing seems to affect anything here
                 save_file.seek(7, 1)
                 current_save_slot_data.inventory[2].extend(struct.unpack('<127b', save_file.read(0x7F))) # gear counts
-                current_save_slot_data.badge_data[1] = int.from_bytes(save_file.read(1)) # badge collection bitfield
+                current_save_slot_data.badge_data[1][0] = int.from_bytes(save_file.read(1)) # badge collection bitfield
                 save_file.seek(11, 1)
                 ## ?? ?? ?? TT TT TT TT ?? ?? ?? ??
                 ## TT = game timer (in frames)
@@ -169,7 +169,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     save_file.write(struct.pack('<8hb', *current_save_slot_data[current_slot].player_stats[current_player][:9]))
                     save_file.write(current_save_slot_data[current_slot].player_stats[current_player][9].to_bytes(3, 'little')) # EXP being a bitch
                     save_file.write(struct.pack('<3B', *current_save_slot_data[current_slot].player_stats[current_player][10:]))
-                    save_file.seek(5, 1)
+                    save_file.seek(1, 1)
+                    save_file.write(current_save_slot_data[current_slot].badge_data[0][current_player].to_bytes(1))
+                    save_file.seek(3, 1)
 
                 # player inventory data
                 # ---------------------------------------------------------
@@ -179,6 +181,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 save_file.write(struct.pack('<26b', *current_save_slot_data[current_slot].inventory[1])) # item counts
                 save_file.seek(7, 1)
                 save_file.write(struct.pack('<127b', *current_save_slot_data[current_slot].inventory[2])) # gear counts
+                save_file.write(current_save_slot_data[current_slot].badge_data[1][0].to_bytes(1)) # badge collection bitfield
+                save_file.seek(11, 1)
+                save_file.write(struct.pack('<2H', *current_save_slot_data[current_slot].badge_data[2])) # badge meters
 
                 # checksum
                 # ---------------------------------------------------------
@@ -204,8 +209,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if rom.idCode[3] == 69 or rom.idCode[3] == 80:                                                               # US-base
             self.overlay_MObj = rom.loadArm9Overlays([132])[132].data
             self.overlay_MObj_offsets = (0x20F0, 0x2E94, 0x2C80) # filedata, sprite groups, palette groups
+            self.rom_base = 1
         else:                                                                                                        # JP-base
             self.overlay_MObj = rom.loadArm9Overlays([126])[126].data
             self.overlay_MObj_offsets = (0x209C, 0x2DA0, 0x2BA0) # filedata, sprite groups, palette groups
+            self.rom_base = 0
         
         self.MObj_file = rom.getFileByName('MObj/MObj.dat')

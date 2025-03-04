@@ -20,10 +20,23 @@ class SaveFileTab(QtWidgets.QTabWidget):
         self.player_stats_tab = PlayerStatsTab(self, has_rom)
         self.player_inventory_tab = PlayerInventoryTab(self, has_rom)
         self.player_abilities_tab = PlayerAbilitiesTab(self, has_rom)
+
+        if self.parent.has_rom:
+            tab_icons = [
+                QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 11, 2 + self.parent.rng[0], self.parent.lang))),
+                QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 9, 24 + (self.parent.rng[1] * 6), self.parent.lang))),
+                QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 31, 4 - (self.parent.rng[0] * 4), self.parent.lang))),
+            ]
+        else:
+            tab_icons = [
+                QtGui.QIcon(),
+                QtGui.QIcon(),
+                QtGui.QIcon(),
+            ]
         
-        self.addTab(self.player_stats_tab, QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 11, 2 + self.parent.rng[0], self.parent.lang))), "Player &Stats")
-        self.addTab(self.player_inventory_tab, QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 9, 24 + (self.parent.rng[1] * 6), self.parent.lang))), "&Inventory")
-        self.addTab(self.player_abilities_tab, QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 31, 4 - (self.parent.rng[0] * 4), self.parent.lang))), "&Badges and Abilities")
+        self.addTab(self.player_stats_tab, tab_icons[0], "Player &Stats")
+        self.addTab(self.player_inventory_tab, tab_icons[1], "&Inventory")
+        self.addTab(self.player_abilities_tab, tab_icons[2], "&Badges and Abilities")
     
     def set_data(self, data):
         self.player_stats_tab.stats_data = data.player_stats
@@ -39,6 +52,7 @@ class SaveFileTab(QtWidgets.QTabWidget):
         return_save = SaveData()
         return_save.player_stats = self.player_stats_tab.stats_data
         return_save.inventory = self.player_inventory_tab.inventory_data
+        return_save.badge_data = self.player_abilities_tab.badge_data
 
         return return_save
     
