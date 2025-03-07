@@ -460,6 +460,8 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 self.current_rank_icons[current_player].setPixmap(self.assign_rank_sprites(rank))
             else:
                 self.current_rank_icons[current_player].setText(RANK_NAMES[rank])
+            if current_player == 2:
+                rank -= 6
 
             for i in range(len(self.equipped_gear_boxes[current_player])):
                 gear = self.equipped_gear_boxes[current_player][i]

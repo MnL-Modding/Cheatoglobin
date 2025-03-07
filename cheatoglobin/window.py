@@ -121,6 +121,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 ## ?? ?? ?? TT TT TT TT ?? ?? ?? ??
                 ## TT = game timer (in frames)
                 current_save_slot_data.badge_data[2].extend(struct.unpack('<2H', save_file.read(0x4))) # badge meters
+                save_file.seek(28, 1)
+                # 6 bytes of unknown, 20 bytes of challenge node/broque madame data, 2 btyes of unknown
+
+                # global variable data
+                # ---------------------------------------------------------
+                save_file.seek(slot_offsets[current_slot] + 0x0124)
+
+                current_save_slot_data.var_2xxx.extend(struct.unpack('<8B', save_file.read(0x8))) # ability variables
 
                 # ---------------------------------------------------------
             
@@ -209,6 +217,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if rom.idCode[3] == 69 or rom.idCode[3] == 80:                                                               # US-base
             self.overlay_MObj = rom.loadArm9Overlays([132])[132].data
             self.overlay_MObj_offsets = (0x20F0, 0x2E94, 0x2C80) # filedata, sprite groups, palette groups
+            self.overlay_FObj = rom.loadArm9Overlays([3])[3].data
+            self.overlay_FObj_offsets = (0xE8A4, 0x165E4, 0x150C8) # filedata, sprite groups, palette groups
             self.rom_base = 1
         else:                                                                                                        # JP-base
             self.overlay_MObj = rom.loadArm9Overlays([126])[126].data
@@ -216,3 +226,4 @@ class MainWindow(QtWidgets.QMainWindow):
             self.rom_base = 0
         
         self.MObj_file = rom.getFileByName('MObj/MObj.dat')
+        self.FObj_file = rom.getFileByName('FObj/FObj.dat')

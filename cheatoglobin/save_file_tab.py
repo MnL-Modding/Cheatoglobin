@@ -46,6 +46,7 @@ class SaveFileTab(QtWidgets.QTabWidget):
         self.player_inventory_tab.set_data()
         
         self.player_abilities_tab.badge_data = data.badge_data
+        self.player_abilities_tab.var_2xxx_data = [data.var_2xxx[0], data.var_2xxx[1] & 0b01010000, data.var_2xxx[4] & 0b00010000]
         self.player_abilities_tab.set_data()
     
     def get_data(self):
@@ -67,3 +68,5 @@ class SaveData():
         self.player_stats = [[], [], []] # mario stats, luigi stats, bowser stats
         self.inventory = [[0], [], []] # coin count, item list, gear list
         self.badge_data = [[], [0], []] # equipped badges, badge collection bitfield, meter progress
+
+        self.var_2xxx = [] # abilities/key flags

@@ -275,3 +275,16 @@ BADGE_PENALTIES = (
     20,  0,  0, 40,
     80, 20,  0,  0,
 )
+
+ABILITY_NAMES = (
+    "Mini Mario",
+    "Hammers",
+    "Spin Jump",
+    "Drill Bros",
+    "Flame Breath",
+    "Sliding Punch",
+    "Body Slam",
+    "Spike Ball",
+    "Vacuum Block",
+    "Spiky Shell",
+)
