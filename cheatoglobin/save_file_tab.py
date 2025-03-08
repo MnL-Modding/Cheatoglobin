@@ -48,12 +48,25 @@ class SaveFileTab(QtWidgets.QTabWidget):
         self.player_abilities_tab.badge_data = data.badge_data
         self.player_abilities_tab.var_2xxx_data = [data.var_2xxx[0], data.var_2xxx[1] & 0b01010000, data.var_2xxx[4] & 0b00010000]
         self.player_abilities_tab.set_data()
+
+        self.var_2xxx_data_backup = data.var_2xxx
     
     def get_data(self):
         return_save = SaveData()
         return_save.player_stats = self.player_stats_tab.stats_data
         return_save.inventory = self.player_inventory_tab.inventory_data
         return_save.badge_data = self.player_abilities_tab.badge_data
+
+        return_save.var_2xxx = [
+            self.player_abilities_tab.var_2xxx_data[0],
+            (self.var_2xxx_data_backup[1] & 0b10101111) + self.player_abilities_tab.var_2xxx_data[1],
+            self.var_2xxx_data_backup[2],
+            self.var_2xxx_data_backup[3],
+            (self.var_2xxx_data_backup[1] & 0b11101111) + self.player_abilities_tab.var_2xxx_data[2],
+            self.var_2xxx_data_backup[5],
+            self.var_2xxx_data_backup[6],
+            self.var_2xxx_data_backup[7],
+        ]
 
         return return_save
     

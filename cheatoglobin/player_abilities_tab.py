@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
-from cheatoglobin.image import create_MObj_sprite, create_FObj_sprite
+from cheatoglobin.image import create_MObj_sprite, create_FObj_sprite, create_BObjUI_sprite
 from cheatoglobin.constants import *
 
 class PlayerAbilitiesTab(QtWidgets.QWidget):
@@ -191,7 +191,7 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
         main_layout.addWidget(line)
 
-        # player abilities
+        # field abilities
 
         field_abilities = QtWidgets.QWidget()
         field_abilities_layout = QtWidgets.QGridLayout(field_abilities)
@@ -240,7 +240,46 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
 
         # battle abilities
 
+        battle_abilities = QtWidgets.QWidget()
+        battle_abilities_layout = QtWidgets.QGridLayout(battle_abilities)
+        battle_abilities_layout.setContentsMargins(0, 0, 0, 0)
+
+        for i in range(2):
+            current_ability = QtWidgets.QFrame()
+            current_ability_layout = QtWidgets.QHBoxLayout(current_ability)
+            current_ability_layout.setContentsMargins(11, 0, 11, 0)
+
+            if self.has_rom:
+                current_ability_icon = QtWidgets.QLabel()
+                self.labels_that_need_ability_sprites.append((current_ability_icon, i + 9))
+                current_ability_layout.addWidget(current_ability_icon)
+            else:
+                current_ability_icon = QtWidgets.QLabel("")
+
+            current_ability_name = QtWidgets.QLabel(ABILITY_NAMES[i + 8])
+            current_ability_layout.addWidget(current_ability_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+            line = QtWidgets.QFrame()
+            line.setFrameShape(QtWidgets.QFrame.HLine)
+            line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            line.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            current_ability_layout.addWidget(line)
+            
+            current_ability_box = QtWidgets.QCheckBox()
+            current_ability_box.checkStateChanged.connect(partial(self.change_data, 3, i + 9))
+            current_ability_layout.addWidget(current_ability_box, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
+
+            battle_abilities_layout.addWidget(current_ability, 0, i)
+            self.all_ability_widget_sets.append((current_ability_icon, current_ability_name, current_ability_box, current_ability, line))
+
+        for i in range(2):
+            padding = QtWidgets.QWidget()
+            main_layout.addWidget(padding)
+            padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            battle_abilities_layout.addWidget(padding, 0, i + 2)
+
         main_layout.addWidget(QtWidgets.QLabel("Battle Abilities:"))
+        main_layout.addWidget(battle_abilities)
 
         # --------------------------------------------------------
 
@@ -304,15 +343,27 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
         index = 0
         ability_sprites = [[0x2E, 1, 6], [0x2E, 0, 5], [0x2E, 0, 7], [0x2E, 1, 8], [0x1E0, 1, 4], [0x1E0, 0, 3], [0x1E0, 1, 5], [0x1E0, 0, 6]]
         for ability in self.labels_that_need_ability_sprites:
-            tex = create_FObj_sprite(
-                self.parent.parent.overlay_FObj_offsets,
-                self.parent.parent.overlay_FObj,
-                self.parent.parent.FObj_file,
-                ability_sprites[index][0],
-                [ability_sprites[index][1], ability_sprites[index][2]],
-                self.parent.parent.lang)
-            ability[0].setPixmap(tex)
-            ability[0].setFixedWidth(tex.width())
+            if index < 8:
+                tex = create_FObj_sprite(
+                    self.parent.parent.overlay_FObj_offsets,
+                    self.parent.parent.overlay_FObj,
+                    self.parent.parent.FObj_file,
+                    ability_sprites[index][0],
+                    [ability_sprites[index][1], ability_sprites[index][2]],
+                    self.parent.parent.lang)
+                ability[0].setPixmap(tex)
+                ability[0].setFixedWidth(tex.width())
+            else:
+                tex = create_BObjUI_sprite(
+                    self.parent.parent.overlay_BObjUI_offsets,
+                    self.parent.parent.overlay_BObjUI_filedata,
+                    self.parent.parent.overlay_BObjUI_groupdata,
+                    self.parent.parent.BObjUI_file,
+                    [12, 11][index - 8],
+                    [13, 46][index - 8],
+                    self.parent.parent.lang)
+                ability[0].setPixmap(tex)
+                ability[0].setFixedWidth(tex.width())
             index += 1
     
     def change_data(self, data_type, stat, value):
@@ -459,9 +510,17 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
         for i in range(len(self.all_ability_widget_sets)):
             ability_widgets = self.all_ability_widget_sets[i]
 
-            stat_enabled = self.var_2xxx_data[0] & (1 << i) != 0
-            if i == 4:
-                stat_enabled = not stat_enabled
+            if i < 8:
+                stat_enabled = self.var_2xxx_data[0] & (1 << i) != 0
+                if i == 4:
+                    stat_enabled = not stat_enabled
+                    print(i)
+            elif i == 8:
+                stat_enabled = self.var_2xxx_data[1] & (1 << 6) != 0
+                print("wqow")
+            elif i == 9:
+                stat_enabled = self.var_2xxx_data[2] & (1 << 4) != 0
+                print("whar")
 
             ability_widgets[2].blockSignals(True)
 

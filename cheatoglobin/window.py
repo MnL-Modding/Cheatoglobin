@@ -103,9 +103,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     current_save_slot_data.player_stats[current_player].extend(struct.unpack('<8hb', save_file.read(0x11)))
                     current_save_slot_data.player_stats[current_player].append(int.from_bytes(save_file.read(3), "little")) # EXP being a bitch
                     current_save_slot_data.player_stats[current_player].extend(struct.unpack('<3B', save_file.read(0x03)))
-                    save_file.seek(1, 1)
+                    save_file.seek(1, 1) # fourth gear slot (unused, but you can enable it through hex editing RAM. i won't include it here tho since it's unobtainable without additional mods)
                     current_save_slot_data.badge_data[0].append(int.from_bytes(save_file.read(1)))
-                    save_file.seek(3, 1)
+                    save_file.seek(3, 1) # unused
 
                 # player inventory data
                 # ---------------------------------------------------------
@@ -177,9 +177,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     save_file.write(struct.pack('<8hb', *current_save_slot_data[current_slot].player_stats[current_player][:9]))
                     save_file.write(current_save_slot_data[current_slot].player_stats[current_player][9].to_bytes(3, 'little')) # EXP being a bitch
                     save_file.write(struct.pack('<3B', *current_save_slot_data[current_slot].player_stats[current_player][10:]))
-                    save_file.seek(1, 1)
+                    save_file.seek(1, 1) # fourth gear slot (unused, but you can enable it through hex editing RAM. i won't include it here tho since it's unobtainable without additional mods)
                     save_file.write(current_save_slot_data[current_slot].badge_data[0][current_player].to_bytes(1))
-                    save_file.seek(3, 1)
+                    save_file.seek(3, 1) # unused
 
                 # player inventory data
                 # ---------------------------------------------------------
@@ -192,6 +192,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 save_file.write(current_save_slot_data[current_slot].badge_data[1][0].to_bytes(1)) # badge collection bitfield
                 save_file.seek(11, 1)
                 save_file.write(struct.pack('<2H', *current_save_slot_data[current_slot].badge_data[2])) # badge meters
+                save_file.seek(28, 1)
+
+                # global variable data
+                # ---------------------------------------------------------
+                save_file.seek(slot_offsets[current_slot] + 0x0124)
+
+                save_file.write(struct.pack('<8B', *current_save_slot_data[current_slot].var_2xxx)) # ability variables
 
                 # checksum
                 # ---------------------------------------------------------
@@ -219,6 +226,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.overlay_MObj_offsets = (0x20F0, 0x2E94, 0x2C80) # filedata, sprite groups, palette groups
             self.overlay_FObj = rom.loadArm9Overlays([3])[3].data
             self.overlay_FObj_offsets = (0xE8A4, 0x165E4, 0x150C8) # filedata, sprite groups, palette groups
+            self.overlay_BObjUI_filedata = rom.loadArm9Overlays([14])[14].data
+            self.overlay_BObjUI_groupdata = rom.loadArm9Overlays([13])[13].data
+            self.overlay_BObjUI_offsets = (0x91C4, 0x69D4, 0x645C) # filedata, sprite groups, palette groups
             self.rom_base = 1
         else:                                                                                                        # JP-base
             self.overlay_MObj = rom.loadArm9Overlays([126])[126].data
@@ -227,3 +237,4 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.MObj_file = rom.getFileByName('MObj/MObj.dat')
         self.FObj_file = rom.getFileByName('FObj/FObj.dat')
+        self.BObjUI_file = rom.getFileByName('BObjUI/BObjUI.dat')
