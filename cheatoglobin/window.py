@@ -137,9 +137,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.file_1_tab.set_data(save_data_set[0])
             self.file_2_tab.set_data(save_data_set[1])
 
-            save_file.seek(0)
-            self.preserved_file = save_file.read()
-
         self.file_1_tab.set_edited(False)
         self.file_2_tab.set_edited(False)
 
@@ -165,7 +162,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         slot_offsets = (0x0010, 0x0FE8)
 
-        with open(self.current_path, 'w+b') as save_file:
+        with open(self.current_path, 'r+b') as save_file:
+            save_file.seek(0)
+            self.preserved_file = save_file.read()
+            save_file.seek(0)
             save_file.write(self.preserved_file)
             current_save_slot_data = [self.file_1_tab.get_data(), self.file_2_tab.get_data()]
             for current_slot in range(2):
@@ -218,23 +218,29 @@ class MainWindow(QtWidgets.QMainWindow):
     def import_rom(self): # TO DO: make the user be able to import other ROMs or whatever, do what spritoglobin does
         self.has_rom = True
 
-        path = "BISROM.nds"
+        path = "JPBISROM.nds"
         rom = ndspy.rom.NintendoDSRom.fromFile(path)
 
         if rom.idCode[3] == 69 or rom.idCode[3] == 80:                                                               # US-base
             self.overlay_MObj = rom.loadArm9Overlays([132])[132].data
-            self.overlay_MObj_offsets = (0x20F0, 0x2E94, 0x2C80) # filedata, sprite groups, palette groups
+            self.overlay_MObj_offsets = (0x20EC, 0x2E94, 0x2C80) # filedata, sprite groups, palette groups
             self.overlay_FObj = rom.loadArm9Overlays([3])[3].data
-            self.overlay_FObj_offsets = (0xE8A4, 0x165E4, 0x150C8) # filedata, sprite groups, palette groups
-            self.overlay_BObjUI_filedata = rom.loadArm9Overlays([14])[14].data
-            self.overlay_BObjUI_groupdata = rom.loadArm9Overlays([13])[13].data
-            self.overlay_BObjUI_offsets = (0x91C4, 0x69D4, 0x645C) # filedata, sprite groups, palette groups
+            self.overlay_FObj_offsets = (0xE8A0, 0x165E4, 0x150C8) # filedata, sprite groups, palette groups
+            self.overlay_FObjPc_offsets = (0xBDB0, 0x15854, 0x148D4) # filedata, sprite groups, palette groups
+            self.overlay_BObj = [rom.loadArm9Overlays([14])[14].data, rom.loadArm9Overlays([13])[13].data]
+            self.overlay_BObjUI_offsets = (0x91C0, 0x69D4, 0x645C) # filedata, sprite groups, palette groups
             self.rom_base = 1
         else:                                                                                                        # JP-base
             self.overlay_MObj = rom.loadArm9Overlays([126])[126].data
-            self.overlay_MObj_offsets = (0x209C, 0x2DA0, 0x2BA0) # filedata, sprite groups, palette groups
+            self.overlay_MObj_offsets = (0x2098, 0x2DA0, 0x2BA0) # filedata, sprite groups, palette groups
+            self.overlay_FObj = rom.loadArm9Overlays([3])[3].data
+            self.overlay_FObj_offsets = (0xEB0C, 0x16E00, 0x158E8) # filedata, sprite groups, palette groups
+            self.overlay_FObjPc_offsets = (0xC01C, 0x16070, 0x150F4) # filedata, sprite groups, palette groups
+            self.overlay_BObj = rom.loadArm9Overlays([11])[11].data
+            self.overlay_BObjUI_offsets = (0x5560C, 0x4D4B4, 0x4CF3C) # filedata, sprite groups, palette groups
             self.rom_base = 0
         
         self.MObj_file = rom.getFileByName('MObj/MObj.dat')
         self.FObj_file = rom.getFileByName('FObj/FObj.dat')
+        self.FObjPc_file = rom.getFileByName('FObjPc/FObjPc.dat')
         self.BObjUI_file = rom.getFileByName('BObjUI/BObjUI.dat')

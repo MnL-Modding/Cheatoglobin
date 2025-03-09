@@ -17,6 +17,7 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         
         self.setWidget(main)
         self.setWidgetResizable(True)
+        self.setBackgroundRole(QtGui.QPalette.Button)
 
         self.labels_that_need_item_sprites = []
 

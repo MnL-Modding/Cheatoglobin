@@ -24,6 +24,7 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
 
         badges_enabled = QtWidgets.QWidget()
         badges_enabled_layout = QtWidgets.QHBoxLayout(badges_enabled)
+        badges_enabled_layout.setContentsMargins(0, 0, 0, 0)
 
         padding = QtWidgets.QWidget()
         badges_enabled_layout.addWidget(padding)
@@ -120,7 +121,7 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
         player_badges_layout.addWidget(luigi_badges)
         if self.parent.parent.has_rom:
             self.badge_icon = QtWidgets.QLabel()
-            player_badges_layout.addWidget(self.badge_icon)
+            player_badges_layout.addWidget(self.badge_icon, alignment = QtCore.Qt.AlignmentFlag.AlignCenter)
         player_badges_layout.addWidget(mario_badges)
 
         main_layout.addWidget(self.player_badges)
@@ -211,6 +212,33 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
             else:
                 current_ability_icon = QtWidgets.QLabel("")
 
+            # i don't hate the idea of these extra icons but i'm shelving the idea for now (it *won't* be re-implemented like this tho, i just don't feel like putting in the extra work rn)
+            # match i:
+            #     case 1:
+            #         current_second_ability_icon = QtWidgets.QLabel()
+            #         tex = create_BObjUI_sprite(
+            #                 self.parent.parent.overlay_BObjUI_offsets,
+            #                 self.parent.parent.overlay_BObjUI_filedata,
+            #                 self.parent.parent.overlay_BObjUI_groupdata,
+            #                 self.parent.parent.BObjUI_file,
+            #                 12,
+            #                 1,
+            #                 self.parent.parent.lang)
+            #         current_second_ability_icon.setPixmap(tex)
+            #         current_ability_layout.addWidget(current_second_ability_icon)
+            #     case 4:
+            #         current_second_ability_icon = QtWidgets.QLabel()
+            #         tex = create_BObjUI_sprite(
+            #                 self.parent.parent.overlay_BObjUI_offsets,
+            #                 self.parent.parent.overlay_BObjUI_filedata,
+            #                 self.parent.parent.overlay_BObjUI_groupdata,
+            #                 self.parent.parent.BObjUI_file,
+            #                 12,
+            #                 12,
+            #                 self.parent.parent.lang)
+            #         current_second_ability_icon.setPixmap(tex)
+            #         current_ability_layout.addWidget(current_second_ability_icon)
+
             current_ability_name = QtWidgets.QLabel(ABILITY_NAMES[i])
             current_ability_layout.addWidget(current_ability_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
@@ -224,7 +252,7 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
             current_ability_box.checkStateChanged.connect(partial(self.change_data, 3, i))
             current_ability_layout.addWidget(current_ability_box, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
 
-            organization = [1, 0, 2, 3, 5, 4, 7, 6]
+            organization = [1, 0, 2, 3, 4, 5, 6, 7]
             field_abilities_layout.addWidget(current_ability, organization[i] // 4, organization[i] % 4)
             self.all_ability_widget_sets.append((current_ability_icon, current_ability_name, current_ability_box, current_ability, line))
         
@@ -356,8 +384,7 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
             else:
                 tex = create_BObjUI_sprite(
                     self.parent.parent.overlay_BObjUI_offsets,
-                    self.parent.parent.overlay_BObjUI_filedata,
-                    self.parent.parent.overlay_BObjUI_groupdata,
+                    self.parent.parent.overlay_BObj,
                     self.parent.parent.BObjUI_file,
                     [12, 11][index - 8],
                     [13, 46][index - 8],
@@ -425,7 +452,8 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
         self.luigi_badge_selection.blockSignals(False)
 
         if self.parent.parent.has_rom:
-            self.badge_icon.setPixmap(self.assign_badge_sprites([self.badge_data[0][0] + 12, self.badge_data[0][1] + 12]))
+            badge_tex = self.assign_badge_sprites([self.badge_data[0][0] + 12, self.badge_data[0][1] + 12])
+            self.badge_icon.setPixmap(badge_tex)
 
         badge_meter_full = 140 + BADGE_PENALTIES[self.badge_data[0][0]] + BADGE_PENALTIES[self.badge_data[0][1]]
 
@@ -514,13 +542,10 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
                 stat_enabled = self.var_2xxx_data[0] & (1 << i) != 0
                 if i == 4:
                     stat_enabled = not stat_enabled
-                    print(i)
             elif i == 8:
                 stat_enabled = self.var_2xxx_data[1] & (1 << 6) != 0
-                print("wqow")
             elif i == 9:
                 stat_enabled = self.var_2xxx_data[2] & (1 << 4) != 0
-                print("whar")
 
             ability_widgets[2].blockSignals(True)
 

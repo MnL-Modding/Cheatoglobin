@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
-from cheatoglobin.image import create_MObj_sprite
+from cheatoglobin.image import create_MObj_sprite, create_FObj_sprite
 from cheatoglobin.constants import *
 
 class PlayerStatsTab(QtWidgets.QWidget):
@@ -9,10 +9,11 @@ class PlayerStatsTab(QtWidgets.QWidget):
         super().__init__()
 
         self.stats_data = None
+        self.var_2xxx_data = None
         self.parent = parent
         self.has_rom = has_rom
 
-        main_layout = QtWidgets.QHBoxLayout(self)
+        main_layout = QtWidgets.QVBoxLayout(self)
 
         self.base_stat_boxes = ([], [], [])
         self.base_stat_additives = ([], [], [])
@@ -32,17 +33,57 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
         # ======================================================================================================================
 
+        # bowser enabled
+
+        bowser_enabled = QtWidgets.QWidget()
+        bowser_enabled_layout = QtWidgets.QHBoxLayout(bowser_enabled)
+        bowser_enabled_layout.setContentsMargins(0, 0, 0, 0)
+
+        padding = QtWidgets.QWidget()
+        bowser_enabled_layout.addWidget(padding)
+        padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        if self.has_rom:
+            self.bowser_enabled_icon = QtWidgets.QLabel()
+            bowser_enabled_layout.addWidget(self.bowser_enabled_icon)
+
+        bowser_enabled_label = QtWidgets.QLabel("Player Can See Bowser in the Star Menu:")
+        bowser_enabled_layout.addWidget(bowser_enabled_label, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        self.bowser_enabled_box = QtWidgets.QCheckBox()
+        self.bowser_enabled_box.checkStateChanged.connect(partial(self.change_data, -1, -1))
+        bowser_enabled_layout.addWidget(self.bowser_enabled_box, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        padding = QtWidgets.QWidget()
+        bowser_enabled_layout.addWidget(padding)
+        padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        main_layout.addWidget(bowser_enabled)
+
+        # --------------------------------------------------------
+
+        line = QtWidgets.QFrame()
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        main_layout.addWidget(line)
+
         # player stats
+
+        stats = QtWidgets.QWidget()
+        stats_layout = QtWidgets.QHBoxLayout(stats)
+        stats_layout.setContentsMargins(0, 0, 0, 0)
 
         for current_player in range(3):
             player_stats = QtWidgets.QFrame()
+            if current_player == 2:
+                self.bowser_stats = player_stats
             player_stats.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
             player_stats.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
             player_stats_layout = QtWidgets.QVBoxLayout(player_stats)
 
             player_color = player_stats.palette()
-            player_color.setColor(QtGui.QPalette.Window, QtGui.QColor(*PLAYER_COLORS[(current_player * 3) + 1]))
-            player_stats.setPalette(player_color)
+            player_stats.setStyleSheet("QFrame { background-color: " + '#{:02X}{:02X}{:02X}'.format(*PLAYER_COLORS[(current_player * 3) + 1]) + " ; }"
+                                   "QFrame:disabled { background-color: #606060 ; }")
             player_stats.setAutoFillBackground(True)
 
             if self.has_rom:
@@ -296,11 +337,15 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 player_stats_layout.addWidget(current_gear_box)
                 self.equipped_gear_boxes[current_player].append(current_gear_box)
 
-            main_layout.addWidget(player_stats)
+            stats_layout.addWidget(player_stats)
+        
+        main_layout.addWidget(stats)
 
-            # --------------------------------------------------------
+        # --------------------------------------------------------
 
-            self.assign_sprites()
+        self.bowser_stats.setEnabled(False)
+
+        self.assign_sprites()
     
     def assign_rank_sprites(self, rank):
         tex = create_MObj_sprite(
@@ -316,6 +361,14 @@ class PlayerStatsTab(QtWidgets.QWidget):
     def assign_sprites(self):
         if not self.has_rom:
             return
+        
+        self.bowser_enabled_icon.setPixmap(create_FObj_sprite(
+                self.parent.parent.overlay_FObjPc_offsets,
+                self.parent.parent.overlay_FObj,
+                self.parent.parent.FObjPc_file,
+                167,
+                0,
+                self.parent.parent.lang))
 
         for label in self.labels_that_need_name_sprites:
             tex = create_MObj_sprite(
@@ -357,35 +410,47 @@ class PlayerStatsTab(QtWidgets.QWidget):
     def change_data(self, player, stat, value):
         self.parent.set_edited(True)
 
-        self.stats_data[player][stat] = int(str(value), 0)
-
-        if stat == 8:
-            self.current_level_stats[player][1].blockSignals(True)
-            if player != 2:
-                self.stats_data[player][9] = ML_LEVEL_EXP[int(str(value), 0) - 1]
+        if stat == -1:
+            checked = value == QtCore.Qt.Checked
+            if checked:
+                self.var_2xxx_data[0] |= (1 << 6)
             else:
-                self.stats_data[player][9] = KP_LEVEL_EXP[int(str(value), 0) - 1]
+                self.var_2xxx_data[0] &= ~(1 << 6)
+        else:
+            self.stats_data[player][stat] = int(str(value), 0)
 
-        if stat == 9:
-            self.current_level_stats[player][0].blockSignals(True)
-            if player != 2:
-                lv = 0
-                test = int(str(value), 0)
-                for i in ML_LEVEL_EXP:
-                    if test >= i:
-                        lv += 1
-                self.stats_data[player][8] = lv
-            else:
-                lv = 0
-                test = int(str(value), 0)
-                for i in KP_LEVEL_EXP:
-                    if test >= i:
-                        lv += 1
-                self.stats_data[player][8] = lv   
+            if stat == 8:
+                self.current_level_stats[player][1].blockSignals(True)
+                if player != 2:
+                    self.stats_data[player][9] = ML_LEVEL_EXP[int(str(value), 0) - 1]
+                else:
+                    self.stats_data[player][9] = KP_LEVEL_EXP[int(str(value), 0) - 1]
+
+            if stat == 9:
+                self.current_level_stats[player][0].blockSignals(True)
+                if player != 2:
+                    lv = 0
+                    test = int(str(value), 0)
+                    for i in ML_LEVEL_EXP:
+                        if test >= i:
+                            lv += 1
+                    self.stats_data[player][8] = lv
+                else:
+                    lv = 0
+                    test = int(str(value), 0)
+                    for i in KP_LEVEL_EXP:
+                        if test >= i:
+                            lv += 1
+                    self.stats_data[player][8] = lv   
 
         self.set_data()
     
     def set_data(self):
+        self.bowser_enabled_box.blockSignals(True)
+        self.bowser_enabled_box.setChecked(self.var_2xxx_data[0] & 0b01000000 != 0)
+        self.bowser_stats.setEnabled(self.var_2xxx_data[0] & 0b01000000 != 0)
+        self.bowser_enabled_box.blockSignals(False)
+
         for current_player in range(3):
             gear_add = [0, 0, 0, 0, 0, 0]
 
@@ -491,9 +556,9 @@ class PlayerStatsTab(QtWidgets.QWidget):
                     gear.setStyleSheet("")
                 for j in range(len(GEAR_DATA)):
                     if j in problem_list:
-                        gear.setItemData(j, QtGui.QColor(255, 0, 0, 60), QtCore.Qt.BackgroundRole)
+                        gear.setItemData(j, QtGui.QColor(127, 63, 63, 255), QtCore.Qt.BackgroundRole)
                     else:
-                        gear.setItemData(j, QtGui.QColor(0, 0, 0, 0), QtCore.Qt.BackgroundRole)
+                        gear.setItemData(j, QtGui.QPalette().color(QtGui.QPalette.ColorRole.Button), QtCore.Qt.BackgroundRole)
 
                 gear.blockSignals(False)
 

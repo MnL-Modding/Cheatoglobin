@@ -286,5 +286,5 @@ ABILITY_NAMES = (
     "Body Slam",
     "Spike Ball",
     "Vacuum Block",
-    "Spiky Shell",
+    "Shell Defense",
 )

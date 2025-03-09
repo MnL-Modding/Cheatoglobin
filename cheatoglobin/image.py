@@ -18,12 +18,16 @@ def create_MObj_sprite(table_offsets, overlay, MObj_file, group_num, anim_num, l
 create_FObj_sprite = create_MObj_sprite
 create_EObj_sprite = create_MObj_sprite
 
-def create_BObjUI_sprite(table_offsets, file_data_overlay, group_data_overlay, MObj_file, group_num, anim_num, lang):
+def create_BObjUI_sprite(table_offsets, overlays, MObj_file, group_num, anim_num, lang):
     if isinstance(anim_num, int):
         anim_list = [anim_num]
     else:
         anim_list = [*anim_num]
-    return create_XObj_sprite(table_offsets, file_data_overlay, group_data_overlay, MObj_file, group_num, anim_list, lang)
+
+    if isinstance(overlays, list):
+        return create_XObj_sprite(table_offsets, overlays[0], overlays[1], MObj_file, group_num, anim_list, lang)
+    else:
+        return create_XObj_sprite(table_offsets, overlays, overlays, MObj_file, group_num, anim_list, lang)
 
 def create_XObj_sprite(table_offsets, file_data_overlay, group_data_overlay, XObj_file, group_num, anim_list, lang):
     file_data_overlay = BytesIO(file_data_overlay)
@@ -43,15 +47,15 @@ def create_XObj_sprite(table_offsets, file_data_overlay, group_data_overlay, XOb
     group_data_overlay.seek(table_offsets[2] + (pal_gid * 4))
     pal_id = int.from_bytes(group_data_overlay.read(2), "little")
 
-    file_data_overlay.seek(table_offsets[0] + (anim_id * 4))
+    file_data_overlay.seek(table_offsets[0] + (anim_id * 4) + 4)
     XObj_file.seek(int.from_bytes(file_data_overlay.read(4), "little"))
     animation_file = BytesIO(decompress(XObj_file))
 
-    file_data_overlay.seek(table_offsets[0] + (graph_id * 4))
+    file_data_overlay.seek(table_offsets[0] + (graph_id * 4) + 4)
     XObj_file.seek(int.from_bytes(file_data_overlay.read(4), "little"))
     graphics_buffer = BytesIO(decompress(XObj_file))
 
-    file_data_overlay.seek(table_offsets[0] + (pal_id * 4))
+    file_data_overlay.seek(table_offsets[0] + (pal_id * 4) + 4)
     XObj_file.seek(int.from_bytes(file_data_overlay.read(4), "little"))
     palette_file_size = int.from_bytes(XObj_file.read(4), "little")
     palette_file = define_palette(struct.unpack(f'<{palette_file_size // 2}H', XObj_file.read(palette_file_size)))

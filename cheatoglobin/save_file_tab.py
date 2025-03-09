@@ -40,6 +40,7 @@ class SaveFileTab(QtWidgets.QTabWidget):
     
     def set_data(self, data):
         self.player_stats_tab.stats_data = data.player_stats
+        self.player_stats_tab.var_2xxx_data = [data.var_2xxx[5] & 0b01000000]
         self.player_stats_tab.set_data()
         
         self.player_inventory_tab.inventory_data = data.inventory
@@ -62,8 +63,8 @@ class SaveFileTab(QtWidgets.QTabWidget):
             (self.var_2xxx_data_backup[1] & 0b10101111) + self.player_abilities_tab.var_2xxx_data[1],
             self.var_2xxx_data_backup[2],
             self.var_2xxx_data_backup[3],
-            (self.var_2xxx_data_backup[1] & 0b11101111) + self.player_abilities_tab.var_2xxx_data[2],
-            self.var_2xxx_data_backup[5],
+            (self.var_2xxx_data_backup[4] & 0b11101111) + self.player_abilities_tab.var_2xxx_data[2],
+            (self.var_2xxx_data_backup[5] & 0b10111111) + self.player_stats_tab.var_2xxx_data[0],
             self.var_2xxx_data_backup[6],
             self.var_2xxx_data_backup[7],
         ]
