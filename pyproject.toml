@@ -1,24 +1,23 @@
-[project]
-name = "cheatoglobin"
-version = "1.1.0"
-description = "Save editor for Mario & Luigi: Bowser's Inside Story."
-authors = [
-    {name = "Marc (ThePurpleAnon)"}
-]
-license = {text = "GPL-3.0-or-later"}
-readme = "README.md"
-requires-python = ">=3.9,<3.14"
-dependencies = [
-    "pyside6 (>=6.8.2.1,<7.0.0.0)"
-]
-
-[project.scripts]
-cheatoglobin = "cheatoglobin:main"
-
 [tool.poetry]
+name = "cheatoglobin"
+version = "1.1.1"
+description = "Save editor for Mario & Luigi: Bowser's Inside Story."
+authors = ["Marc (ThePurpleAnon)"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+pyside6 = "^6.8.2.1"
+mnllib = { git = "https://github.com/MnL-Modding/mnllib.py.git", branch = "v0.2" }
+ndspy = "^4.1.0"
+pillow = "^11.1.0"
 
 [tool.poetry.group.dev.dependencies]
 nuitka = "^2.6.7"
+
+[tool.poetry.scripts]
+cheatoglobin = "cheatoglobin:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
