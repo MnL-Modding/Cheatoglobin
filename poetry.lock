@@ -83,13 +83,13 @@ pycparser = "*"
 
 [[package]]
 name = "nuitka"
-version = "2.6.7"
+version = "2.6.8"
 description = "Python compiler with full language support and CPython compatibility"
 optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "Nuitka-2.6.7.tar.gz", hash = "sha256:c9d2db630560cf89dfbfd294dd860dd0540e03b74a0c21711ce64305727523bf"},
+    {file = "Nuitka-2.6.8.tar.gz", hash = "sha256:da1197842258fa266d8188d2962913351539d8d2067cfd6d78dee2762808d516"},
 ]
 
 [package.dependencies]

@@ -37,14 +37,14 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         menu_bar_file.addSeparator() # -----------------------------------------
         menu_bar_file.addAction(
+            "Choose ROM",
+            self.update_rom,
+        )
+        menu_bar_file.addSeparator() # -----------------------------------------
+        menu_bar_file.addAction(
             "&Quit",
             QtGui.QKeySequence.StandardKey.Quit,
             QtWidgets.QApplication.quit,
-        )
-        menu_bar_config = menu_bar.addMenu("Config")
-        menu_bar_config.addAction(
-            "Choose ROM",
-            self.update_rom,
         )
 
         self.has_rom = False
@@ -229,7 +229,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.information(
                 self,
                 "Choose a ROM",
-                f"This program can use a Bowser's Inside Story ROM to display graphics and text right from the game.\n\nIf you would like to use a ROM to enhance the program's graphics, please choose one now.\n\nThis can be changed at any time by using the \"Choose ROM\" option under the \"Config\" tab in the toolbar.",
+                f"This program can use a Bowser's Inside Story ROM to display graphics and text right from the game.\n\nIf you would like to use a ROM to enhance the program's graphics, please choose one now.\n\nThis can be changed at any time by using the \"Choose ROM\" option under the \"File\" tab in the toolbar.",
             )
             self.choose_rom()
         else:
@@ -282,7 +282,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(
             self,
             "Invalid ROM",
-            f"The chosen ROM is not a valid Bowser's Inside Story ROM.\n\nPlease use the \"Config\" tab in the toolbar to choose a valid ROM.",
+            f"The chosen ROM is not a valid Bowser's Inside Story ROM.\n\nPlease use the \"File\" tab in the toolbar to choose a valid ROM.",
             )
             return
 
