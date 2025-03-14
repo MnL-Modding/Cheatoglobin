@@ -25,7 +25,7 @@ class SaveFileTab(QtWidgets.QTabWidget):
             tab_icons = [
                 QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 11, 2 + self.parent.rng[0], self.parent.lang))),
                 QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 9, 24 + (self.parent.rng[1] * 6), self.parent.lang))),
-                QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 31, 4 - (self.parent.rng[0] * 4), self.parent.lang))),
+                QtGui.QIcon(QtGui.QIcon(create_MObj_sprite(self.parent.overlay_MObj_offsets, self.parent.overlay_MObj,  self.parent.MObj_file, 31, [6, 1][self.parent.rng[0]], self.parent.lang))),
             ]
         else:
             tab_icons = [
