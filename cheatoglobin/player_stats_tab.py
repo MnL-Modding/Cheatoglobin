@@ -1,20 +1,19 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
+from cheatoglobin.image import create_MObj_sprite, create_FObj_sprite
 from cheatoglobin.constants import *
 
 class PlayerStatsTab(QtWidgets.QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, has_rom):
         super().__init__()
 
         self.stats_data = None
+        self.var_2xxx_data = None
         self.parent = parent
+        self.has_rom = has_rom
 
-        # ======================================================================================================================
-
-        # player stats
-
-        main_layout = QtWidgets.QHBoxLayout(self)
+        main_layout = QtWidgets.QVBoxLayout(self)
 
         self.base_stat_boxes = ([], [], [])
         self.base_stat_additives = ([], [], [])
@@ -28,22 +27,74 @@ class PlayerStatsTab(QtWidgets.QWidget):
         
         self.equipped_gear_boxes = ([], [], [])
 
+        self.labels_that_need_name_sprites = []
+        self.labels_that_need_stat_sprites = []
+        self.labels_that_need_item_sprites = []
+
+        # ======================================================================================================================
+
+        # bowser enabled
+
+        bowser_enabled = QtWidgets.QWidget()
+        bowser_enabled_layout = QtWidgets.QHBoxLayout(bowser_enabled)
+        bowser_enabled_layout.setContentsMargins(0, 0, 0, 0)
+
+        padding = QtWidgets.QWidget()
+        bowser_enabled_layout.addWidget(padding)
+        padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        if self.has_rom:
+            self.bowser_enabled_icon = QtWidgets.QLabel()
+            bowser_enabled_layout.addWidget(self.bowser_enabled_icon)
+
+        bowser_enabled_label = QtWidgets.QLabel("Player Can See Bowser in the Star Menu:")
+        bowser_enabled_layout.addWidget(bowser_enabled_label, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        self.bowser_enabled_box = QtWidgets.QCheckBox()
+        self.bowser_enabled_box.checkStateChanged.connect(partial(self.change_data, -1, -1))
+        bowser_enabled_layout.addWidget(self.bowser_enabled_box, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        padding = QtWidgets.QWidget()
+        bowser_enabled_layout.addWidget(padding)
+        padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        main_layout.addWidget(bowser_enabled)
+
+        # --------------------------------------------------------
+
+        line = QtWidgets.QFrame()
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        main_layout.addWidget(line)
+
+        # player stats
+
+        stats = QtWidgets.QWidget()
+        stats_layout = QtWidgets.QHBoxLayout(stats)
+        stats_layout.setContentsMargins(0, 0, 0, 0)
+
         for current_player in range(3):
             player_stats = QtWidgets.QFrame()
+            if current_player == 2:
+                self.bowser_stats = player_stats
             player_stats.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
             player_stats.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
-            #player_stats.setFixedWidth(240)
             player_stats_layout = QtWidgets.QVBoxLayout(player_stats)
 
             player_color = player_stats.palette()
-            player_color.setColor(QtGui.QPalette.Window, QtGui.QColor(*PLAYER_COLORS[(current_player * 3) + 1]))
-            player_stats.setPalette(player_color)
+            player_stats.setStyleSheet("QFrame { background-color: " + '#{:02X}{:02X}{:02X}'.format(*PLAYER_COLORS[(current_player * 3) + 1]) + " ; }"
+                                   "QFrame:disabled { background-color: #606060 ; }")
             player_stats.setAutoFillBackground(True)
 
-            player_name_tex = QtGui.QPixmap(str(FILES_DIR / f"NAME_{PLAYER_NAMES[current_player]}.png"))
-            player_name_tex = player_name_tex.scaled(player_name_tex.width() * 2, player_name_tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
-            player_name = QtWidgets.QLabel()
-            player_name.setPixmap(player_name_tex)
+            if self.has_rom:
+                player_name = QtWidgets.QLabel()
+                self.labels_that_need_name_sprites.append((player_name, current_player))
+            else:
+                player_name = QtWidgets.QLabel(PLAYER_NAMES[current_player])
+                player_name.setStyleSheet("color: #000000;")
+                font = QtGui.QFont()
+                font.setPointSize(player_name.font().pointSize() * 2)
+                player_name.setFont(font)
             player_stats_layout.addWidget(player_name, alignment = QtCore.Qt.AlignmentFlag.AlignCenter)
 
             # --------------------------------------------------------
@@ -66,16 +117,27 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 base_stat_layout.setContentsMargins(0, 0, 0, 0)
 
                 base_stat_text = QtWidgets.QLabel("Base")
-                #base_stat_text.setFixedWidth(24)
                 base_stat_text.setStyleSheet("color: #000000;") 
                 base_stat_layout.addWidget(base_stat_text)
 
-                if (stat != 1 and stat != 5) or current_player != 2:
-                    base_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[0][stat]}.png"))
+                if self.has_rom:
+                    if (stat != 1 and stat != 5) or current_player != 2:
+                        base_stat_icon = QtWidgets.QLabel()
+                        self.labels_that_need_stat_sprites.append((base_stat_icon, stat + 6))
+                    else:
+                        match stat:
+                            case 1:
+                                base_stat_icon = QtWidgets.QLabel()
+                                self.labels_that_need_stat_sprites.append((base_stat_icon, 13))
+                            case 5:
+                                base_stat_icon = QtWidgets.QLabel()
+                                self.labels_that_need_stat_sprites.append((base_stat_icon, 12))
                 else:
-                    base_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[0][stat]}_1.png"))
-                base_stat_icon = QtWidgets.QLabel()
-                base_stat_icon.setPixmap(base_stat_icon_tex)
+                    if stat != 5 or current_player != 2:
+                        base_stat_icon = QtWidgets.QLabel(STAT_NAMES_LANG[0][stat][current_player])
+                    else:
+                        base_stat_icon = QtWidgets.QLabel(STAT_NAMES_LANG[0][stat][current_player])
+                    base_stat_icon.setStyleSheet("color: #000000;") 
                 base_stat_layout.addWidget(base_stat_icon)
 
                 padding = QtWidgets.QWidget()
@@ -88,12 +150,10 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 base_stat_layout.addWidget(base_stat_box)
 
                 base_stat_plus = QtWidgets.QLabel("+")
-                #base_stat_plus.setFixedWidth(6)
                 base_stat_plus.setStyleSheet("color: #000000;") 
                 base_stat_layout.addWidget(base_stat_plus)
 
                 base_stat_additive = QtWidgets.QLabel(str(0))
-                #base_stat_additive.setFixedWidth(20)
                 base_stat_additive.setStyleSheet("color: #000000;")
                 base_stat_layout.addWidget(base_stat_additive)
 
@@ -121,16 +181,19 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 current_stat_layout.setContentsMargins(0, 0, 0, 0)
 
                 current_stat_text = QtWidgets.QLabel("Current")
-                #current_stat_text.setFixedWidth(40)
                 current_stat_text.setStyleSheet("color: #000000;")
                 current_stat_layout.addWidget(current_stat_text)
 
-                if stat != 1 or current_player != 2:
-                    current_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[1][stat]}.png"))
+                if self.has_rom:
+                    if stat != 1 or current_player != 2:
+                        current_stat_icon = QtWidgets.QLabel()
+                        self.labels_that_need_stat_sprites.append((current_stat_icon, stat + 6))
+                    else:
+                        current_stat_icon = QtWidgets.QLabel()
+                        self.labels_that_need_stat_sprites.append((current_stat_icon, 13))
                 else:
-                    current_stat_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[1][stat]}_1.png"))
-                current_stat_icon = QtWidgets.QLabel()
-                current_stat_icon.setPixmap(current_stat_icon_tex)
+                    current_stat_icon = QtWidgets.QLabel(STAT_NAMES_LANG[1][stat][current_player])
+                    current_stat_icon.setStyleSheet("color: #000000;") 
                 current_stat_layout.addWidget(current_stat_icon)
 
                 padding = QtWidgets.QWidget()
@@ -143,12 +206,10 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 current_stat_layout.addWidget(current_stat_box)
 
                 current_stat_slash = QtWidgets.QLabel("/")
-                #current_stat_slash.setFixedWidth(6)
                 current_stat_slash.setStyleSheet("color: #000000;")
                 current_stat_layout.addWidget(current_stat_slash)
 
                 current_stat_total = QtWidgets.QLabel(str(0))
-                #current_stat_total.setFixedWidth(20)
                 current_stat_total.setStyleSheet("color: #000000;")
                 current_stat_layout.addWidget(current_stat_total)
 
@@ -176,10 +237,12 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
             # LV
 
-            current_level_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[2][0]}.png"))
-            current_level_icon = QtWidgets.QLabel()
-            current_level_icon.setPixmap(current_level_icon_tex)
-            current_level_icon.setFixedWidth(18)
+            if self.has_rom:
+                current_level_icon = QtWidgets.QLabel()
+                self.labels_that_need_stat_sprites.append((current_level_icon, 3))
+            else:
+                current_level_icon = QtWidgets.QLabel(STAT_NAMES_LANG[2][0])
+                current_level_icon.setStyleSheet("color: #000000;") 
             level_info_layout.addWidget(current_level_icon, 0, 0)
 
             current_level_box = QtWidgets.QSpinBox()
@@ -192,10 +255,12 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
             # EXP
 
-            current_exp_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"STAT_{STAT_NAMES[2][1]}.png"))
-            current_exp_icon = QtWidgets.QLabel()
-            current_exp_icon.setPixmap(current_exp_icon_tex)
-            current_exp_icon.setFixedWidth(22)
+            if self.has_rom:
+                current_exp_icon = QtWidgets.QLabel()
+                self.labels_that_need_stat_sprites.append((current_exp_icon, 4))
+            else:
+                current_exp_icon = QtWidgets.QLabel(STAT_NAMES_LANG[2][1])
+                current_exp_icon.setStyleSheet("color: #000000;") 
             level_info_layout.addWidget(current_exp_icon, 1, 0)
 
             current_exp_box = QtWidgets.QSpinBox()
@@ -207,10 +272,12 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
             # NEXT
 
-            next_exp_icon_tex = QtGui.QPixmap(str(FILES_DIR / "STAT_NEXT.png"))
-            next_exp_icon = QtWidgets.QLabel()
-            next_exp_icon.setPixmap(next_exp_icon_tex)
-            next_exp_icon.setFixedWidth(40)
+            if self.has_rom:
+                next_exp_icon = QtWidgets.QLabel()
+                self.labels_that_need_stat_sprites.append((next_exp_icon, 5))
+            else:
+                next_exp_icon = QtWidgets.QLabel(STAT_NAMES_LANG[2][2])
+                next_exp_icon.setStyleSheet("color: #000000;") 
             level_info_layout.addWidget(next_exp_icon, 2, 0)
 
             next_exp_text = QtWidgets.QLabel("0")
@@ -220,18 +287,19 @@ class PlayerStatsTab(QtWidgets.QWidget):
 
             # RANK
 
-            if current_player != 2:
-                player = "ML"
+            if self.has_rom:
+                current_rank_icon = QtWidgets.QLabel()
+                self.current_rank_icons.append(current_rank_icon)
+                level_info_layout.addWidget(current_rank_icon, 0, 2, 3, 1, alignment = QtCore.Qt.AlignmentFlag.AlignCenter)
             else:
-                player = "KP"
+                current_rank_icon = QtWidgets.QLabel()
+                current_rank_icon.setStyleSheet("color: #000000;")
+                self.current_rank_icons.append(current_rank_icon)
+                level_info_layout.addWidget(current_rank_icon, 3, 1, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
-            rank = 0
-            current_rank_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"RANK_{player}_{rank}.png"))
-            current_rank_icon_tex = current_rank_icon_tex.scaled(current_rank_icon_tex.width() * 2, current_rank_icon_tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
-            current_rank_icon = QtWidgets.QLabel()
-            current_rank_icon.setPixmap(current_rank_icon_tex)
-            self.current_rank_icons.append(current_rank_icon)
-            level_info_layout.addWidget(current_rank_icon, 0, 2, 3, 1, alignment = QtCore.Qt.AlignmentFlag.AlignCenter)
+                rank_label = QtWidgets.QLabel(STAT_NAMES_LANG[2][3])
+                rank_label.setStyleSheet("color: #000000;")
+                level_info_layout.addWidget(rank_label, 3, 0, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
             player_stats_layout.addWidget(level_info)
 
@@ -256,51 +324,131 @@ class PlayerStatsTab(QtWidgets.QWidget):
             for stat in range(len(STAT_NAMES[3])):
                 current_gear_box = QtWidgets.QComboBox()
 
+                current_index = 0
                 for gear in GEAR_DATA:
-                    current_gear_box.addItem(QtGui.QIcon(str(FILES_DIR / f"GEAR_{gear[0]}.png")), gear[1])
-                    
+                    if self.has_rom:
+                        current_gear_box.addItem(gear[1])
+                        self.labels_that_need_item_sprites.append((current_player, stat, current_index, gear[0]))
+                        current_index += 1
+                    else:
+                        current_gear_box.addItem(gear[1])
                 current_gear_box.currentIndexChanged.connect(partial(self.change_data, current_player, stat + 10))
                 
                 player_stats_layout.addWidget(current_gear_box)
                 self.equipped_gear_boxes[current_player].append(current_gear_box)
 
+            stats_layout.addWidget(player_stats)
+        
+        main_layout.addWidget(stats)
 
-            # --------------------------------------------------------
+        # --------------------------------------------------------
+    
+    def assign_rank_sprites(self, rank):
+        tex = create_MObj_sprite(
+            self.parent.parent.overlay_MObj_offsets,
+            self.parent.parent.overlay_MObj,
+            self.parent.parent.MObj_file,
+            229,
+            rank + 10,
+            self.parent.parent.lang)
+        tex = tex.scaled(tex.width() * 2, tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+        return tex
+    
+    def assign_sprites(self):
+        if not self.has_rom:
+            return
+        
+        self.bowser_enabled_icon.setPixmap(create_FObj_sprite(
+                self.parent.parent.overlay_FObjPc_offsets,
+                self.parent.parent.overlay_FObj,
+                self.parent.parent.FObjPc_file,
+                167,
+                0,
+                self.parent.parent.lang))
 
-            main_layout.addWidget(player_stats)
+        for label in self.labels_that_need_name_sprites:
+            tex = create_MObj_sprite(
+                self.parent.parent.overlay_MObj_offsets,
+                self.parent.parent.overlay_MObj,
+                self.parent.parent.MObj_file,
+                2,
+                label[1],
+                self.parent.parent.lang)
+            tex = tex.scaled(tex.width() * 2, tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+            label[0].setPixmap(tex)
+
+        stat_sprite_cache = {}
+        for stat in self.labels_that_need_stat_sprites:
+            if stat[1] not in stat_sprite_cache:
+                stat_sprite_cache[stat[1]] = create_MObj_sprite(
+                self.parent.parent.overlay_MObj_offsets,
+                self.parent.parent.overlay_MObj,
+                self.parent.parent.MObj_file,
+                2,
+                stat[1],
+                self.parent.parent.lang)
+
+            stat[0].setPixmap(stat_sprite_cache[stat[1]])
+        
+        item_sprite_cache = {}
+        for gear in self.labels_that_need_item_sprites:
+            if gear[3] not in item_sprite_cache:
+                item_sprite_cache[gear[3]] = create_MObj_sprite(
+                self.parent.parent.overlay_MObj_offsets,
+                self.parent.parent.overlay_MObj,
+                self.parent.parent.MObj_file,
+                9,
+                gear[3] * 2,
+                self.parent.parent.lang)
+
+            self.equipped_gear_boxes[gear[0]][gear[1]].setItemIcon(gear[2], item_sprite_cache[gear[3]])
+        
+        self.set_data()
     
     def change_data(self, player, stat, value):
         self.parent.set_edited(True)
 
-        self.stats_data[player][stat] = int(str(value), 0)
-
-        if stat == 8:
-            self.current_level_stats[player][1].blockSignals(True)
-            if player != 2:
-                self.stats_data[player][9] = ML_LEVEL_EXP[int(str(value), 0) - 1]
+        if stat == -1:
+            checked = value == QtCore.Qt.Checked
+            if checked:
+                self.var_2xxx_data[0] |= (1 << 6)
             else:
-                self.stats_data[player][9] = KP_LEVEL_EXP[int(str(value), 0) - 1]
+                self.var_2xxx_data[0] &= ~(1 << 6)
+        else:
+            self.stats_data[player][stat] = int(str(value), 0)
 
-        if stat == 9:
-            self.current_level_stats[player][0].blockSignals(True)
-            if player != 2:
-                lv = 0
-                test = int(str(value), 0)
-                for i in ML_LEVEL_EXP:
-                    if test >= i:
-                        lv += 1
-                self.stats_data[player][8] = lv
-            else:
-                lv = 0
-                test = int(str(value), 0)
-                for i in KP_LEVEL_EXP:
-                    if test >= i:
-                        lv += 1
-                self.stats_data[player][8] = lv   
+            if stat == 8:
+                self.current_level_stats[player][1].blockSignals(True)
+                if player != 2:
+                    self.stats_data[player][9] = ML_LEVEL_EXP[int(str(value), 0) - 1]
+                else:
+                    self.stats_data[player][9] = KP_LEVEL_EXP[int(str(value), 0) - 1]
+
+            if stat == 9:
+                self.current_level_stats[player][0].blockSignals(True)
+                if player != 2:
+                    lv = 0
+                    test = int(str(value), 0)
+                    for i in ML_LEVEL_EXP:
+                        if test >= i:
+                            lv += 1
+                    self.stats_data[player][8] = lv
+                else:
+                    lv = 0
+                    test = int(str(value), 0)
+                    for i in KP_LEVEL_EXP:
+                        if test >= i:
+                            lv += 1
+                    self.stats_data[player][8] = lv   
 
         self.set_data()
     
     def set_data(self):
+        self.bowser_enabled_box.blockSignals(True)
+        self.bowser_enabled_box.setChecked(self.var_2xxx_data[0] & 0b01000000 != 0)
+        self.bowser_stats.setEnabled(self.var_2xxx_data[0] & 0b01000000 != 0)
+        self.bowser_enabled_box.blockSignals(False)
+
         for current_player in range(3):
             gear_add = [0, 0, 0, 0, 0, 0]
 
@@ -365,18 +513,18 @@ class PlayerStatsTab(QtWidgets.QWidget):
             self.current_level_stats[current_player][0].blockSignals(False)
             self.current_level_stats[current_player][1].blockSignals(False)
 
-            if current_player != 2:
-                player = "ML"
-            else:
-                player = "KP"
-
             rank = 0
+            if current_player == 2:
+                rank += 6
             for i in RANK_LEVELS[current_player]:
                 if self.stats_data[current_player][8] >= i:
                     rank += 1
-            current_rank_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"RANK_{player}_{rank}.png"))
-            current_rank_icon_tex = current_rank_icon_tex.scaled(current_rank_icon_tex.width() * 2, current_rank_icon_tex.height() * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
-            self.current_rank_icons[current_player].setPixmap(current_rank_icon_tex)
+            if self.has_rom:
+                self.current_rank_icons[current_player].setPixmap(self.assign_rank_sprites(rank))
+            else:
+                self.current_rank_icons[current_player].setText(RANK_NAMES[rank])
+            if current_player == 2:
+                rank -= 6
 
             for i in range(len(self.equipped_gear_boxes[current_player])):
                 gear = self.equipped_gear_boxes[current_player][i]
@@ -397,7 +545,7 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 problem_list = []
                 for j in range(len(GEAR_DATA)):
                     for k in gear_to_compare:
-                        if (GEAR_DATA[j][0] == GEAR_DATA[k][0] and GEAR_DATA[j][0] != "NONE") or (GEAR_DATA[j][0] in GEAR_DISALLOWED_LIST[current_player]):
+                        if (GEAR_DATA[j][0] == GEAR_DATA[k][0] and GEAR_DATA[j][0] != 2) or (GEAR_DATA[j][0] in GEAR_DISALLOWED_LIST[current_player]):
                             if j not in problem_list:
                                 problem_list.append(j)
                 if gear.currentIndex() in problem_list:
@@ -406,9 +554,9 @@ class PlayerStatsTab(QtWidgets.QWidget):
                     gear.setStyleSheet("")
                 for j in range(len(GEAR_DATA)):
                     if j in problem_list:
-                        gear.setItemData(j, QtGui.QColor(255, 0, 0, 60), QtCore.Qt.BackgroundRole)
+                        gear.setItemData(j, QtGui.QColor(127, 63, 63, 255), QtCore.Qt.BackgroundRole)
                     else:
-                        gear.setItemData(j, QtGui.QColor(0, 0, 0, 0), QtCore.Qt.BackgroundRole)
+                        gear.setItemData(j, QtGui.QPalette().color(QtGui.QPalette.ColorRole.Button), QtCore.Qt.BackgroundRole)
 
                 gear.blockSignals(False)
 

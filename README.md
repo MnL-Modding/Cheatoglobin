@@ -33,6 +33,3 @@ poetry run cheatoglobin
 python3 -m pip install -r requirements.txt
 ```
 and run it from the current directory with `python3 -m cheatoglobin`. Alternatively, it can be run through the `run.bat` if you use Windows.
-
-## License
-This project is licensed under the [GPL-3.0 license](https://www.gnu.org/licenses/gpl-3.0.html). It uses assets that are property of Nintendo, which are not intended to maliciously infringe trademark rights.

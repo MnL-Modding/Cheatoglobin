@@ -1,22 +1,27 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
+from cheatoglobin.image import create_MObj_sprite
 from cheatoglobin.constants import *
 
 class PlayerInventoryTab(QtWidgets.QScrollArea):
-    def __init__(self, parent):
+    def __init__(self, parent, has_rom):
         super().__init__()
 
         self.inventory_data = None
         self.parent = parent
-
-        # ======================================================================================================================
+        self.has_rom = has_rom
 
         main = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout(main)
         
         self.setWidget(main)
         self.setWidgetResizable(True)
+        self.setBackgroundRole(QtGui.QPalette.Button)
+
+        self.labels_that_need_item_sprites = []
+
+        # ======================================================================================================================
 
         # coin count
 
@@ -28,20 +33,16 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         coin_count_layout.addWidget(padding)
         padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        coin_count_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_COIN.png"))
-        coin_count_icon = QtWidgets.QLabel()
-        coin_count_icon.setPixmap(coin_count_icon_tex)
-        coin_count_icon.setFixedWidth(16)
-        coin_count_layout.addWidget(coin_count_icon)
+        if self.has_rom:
+            self.coin_count_icon = QtWidgets.QLabel()
+            coin_count_layout.addWidget(self.coin_count_icon)
 
         coin_count_label = QtWidgets.QLabel("Total &Coins:")
-        #coin_count_label.setFixedWidth(64)
         coin_count_layout.addWidget(coin_count_label, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
         self.coin_count_box = QtWidgets.QSpinBox()
         self.coin_count_box.setMaximum(999999)
         self.coin_count_box.textChanged.connect(partial(self.change_data, 0, 0))
-        # self.coin_count_box.textChanged.connect(partial(self.change_data, current_player, stat))
         coin_count_label.setBuddy(self.coin_count_box)
         coin_count_layout.addWidget(self.coin_count_box, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
 
@@ -72,24 +73,31 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_item_layout = QtWidgets.QHBoxLayout(current_item)
             current_item_layout.setContentsMargins(0, 0, 0, 0)
 
-            current_item_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"ITEM_{item[0]}.png"))
-            current_item_icon = QtWidgets.QLabel()
-            current_item_icon.setPixmap(current_item_icon_tex)
-            current_item_icon.setFixedWidth(16)
-            current_item_layout.addWidget(current_item_icon)
+            if self.has_rom:
+                current_item_icon = QtWidgets.QLabel()
+                self.labels_that_need_item_sprites.append((current_item_icon, item[0]))
+                current_item_layout.addWidget(current_item_icon)
+            else:
+                current_item_icon = QtWidgets.QLabel("")
 
             current_item_name = QtWidgets.QLabel(item[1])
             current_item_layout.addWidget(current_item_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
             
+            line = QtWidgets.QFrame()
+            line.setFrameShape(QtWidgets.QFrame.HLine)
+            line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            line.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            current_item_layout.addWidget(line)
+            
             current_item_box = QtWidgets.QSpinBox()
             current_item_box.setMaximum(99)
             current_item_box.textChanged.connect(partial(self.change_data, 1, i))
-            # current_item_box.textChanged.connect(partial(self.change_data, current_player, stat))
             current_item_layout.addWidget(current_item_box, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
 
             item_counts_layout.addWidget(current_item, i // 4, i % 4)
             self.all_item_widget_sets.append((current_item_icon, current_item_name, current_item_box))
         
+        main_layout.addWidget(QtWidgets.QLabel("Consumables Inventory:"))
         main_layout.addWidget(item_counts)
 
         # --------------------------------------------------------
@@ -113,27 +121,64 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
             current_gear_layout = QtWidgets.QHBoxLayout(current_gear)
             current_gear_layout.setContentsMargins(0, 0, 0, 0)
 
-            current_gear_icon_tex = QtGui.QPixmap(str(FILES_DIR / f"GEAR_{gear[0]}.png"))
-            current_gear_icon = QtWidgets.QLabel()
-            current_gear_icon.setPixmap(current_gear_icon_tex)
-            current_gear_icon.setFixedWidth(16)
-            current_gear_layout.addWidget(current_gear_icon)
+            if self.has_rom:
+                current_gear_icon = QtWidgets.QLabel()
+                self.labels_that_need_item_sprites.append((current_gear_icon, gear[0]))
+                current_gear_layout.addWidget(current_gear_icon)
+            else:
+                current_gear_icon = QtWidgets.QLabel("")
 
             current_gear_name = QtWidgets.QLabel(gear[1])
             current_gear_layout.addWidget(current_gear_name, alignment = QtCore.Qt.AlignmentFlag.AlignLeft)
+
+            line = QtWidgets.QFrame()
+            line.setFrameShape(QtWidgets.QFrame.HLine)
+            line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            line.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            current_gear_layout.addWidget(line)
             
             current_gear_box = QtWidgets.QSpinBox()
             current_gear_box.setMaximum(9)
             current_gear_box.textChanged.connect(partial(self.change_data, 2, i))
-            # current_gear_box.textChanged.connect(partial(self.change_data, current_player, stat))
             current_gear_layout.addWidget(current_gear_box, alignment = QtCore.Qt.AlignmentFlag.AlignRight)
 
             gear_counts_layout.addWidget(current_gear, i // 4, i % 4)
             self.all_gear_widget_sets.append((current_gear_icon, current_gear_name, current_gear_box))
         
+        main_layout.addWidget(QtWidgets.QLabel("Gear Inventory:"))
         main_layout.addWidget(gear_counts)
 
         # --------------------------------------------------------
+    
+    def assign_sprites(self):
+        if not self.has_rom:
+            return
+
+        coin_count_tex = create_MObj_sprite(
+            self.parent.parent.overlay_MObj_offsets,
+            self.parent.parent.overlay_MObj,
+            self.parent.parent.MObj_file,
+            145,
+            0,
+            self.parent.parent.lang)
+        self.coin_count_icon.setPixmap(coin_count_tex)
+        self.coin_count_icon.setFixedWidth(coin_count_tex.width())
+
+        item_sprite_cache = {}
+        for item in self.labels_that_need_item_sprites:
+            if item[1] not in item_sprite_cache:
+                item_sprite_cache[item[1]] = create_MObj_sprite(
+                self.parent.parent.overlay_MObj_offsets,
+                self.parent.parent.overlay_MObj,
+                self.parent.parent.MObj_file,
+                9,
+                item[1] * 2,
+                self.parent.parent.lang)
+
+            item[0].setPixmap(item_sprite_cache[item[1]])
+            item[0].setFixedWidth(item_sprite_cache[item[1]].width())
+        
+        self.set_data()
     
     def change_data(self, data_type, stat, value):
         self.parent.set_edited(True)
@@ -142,18 +187,28 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         self.set_data()
     
     def set_data(self):
+        self.coin_count_box.blockSignals(True)
         self.coin_count_box.setValue(self.inventory_data[0][0])
+        self.coin_count_box.blockSignals(False)
 
         for i in range(len(self.all_item_widget_sets)):
             item_widgets = self.all_item_widget_sets[i]
+
+            item_widgets[2].blockSignals(True)
 
             item_widgets[0].setEnabled(self.inventory_data[1][i] != 0)
             item_widgets[1].setEnabled(self.inventory_data[1][i] != 0)
             item_widgets[2].setValue(self.inventory_data[1][i])
 
+            item_widgets[2].blockSignals(False)
+
         for i in range(len(self.all_gear_widget_sets)):
             gear_widgets = self.all_gear_widget_sets[i]
+
+            gear_widgets[2].blockSignals(True)
 
             gear_widgets[0].setEnabled(self.inventory_data[2][i] != 0)
             gear_widgets[1].setEnabled(self.inventory_data[2][i] != 0)
             gear_widgets[2].setValue(self.inventory_data[2][i])
+
+            gear_widgets[2].blockSignals(False)
