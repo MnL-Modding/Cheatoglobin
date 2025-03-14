@@ -38,6 +38,11 @@ class SaveFileTab(QtWidgets.QTabWidget):
         self.addTab(self.player_inventory_tab, tab_icons[1], "&Inventory")
         self.addTab(self.player_abilities_tab, tab_icons[2], "&Badges and Abilities")
     
+    def assign_sprites(self):
+        self.player_stats_tab.assign_sprites()
+        self.player_inventory_tab.assign_sprites()
+        self.player_abilities_tab.assign_sprites()
+    
     def set_data(self, data):
         self.player_stats_tab.stats_data = data.player_stats
         self.player_stats_tab.var_2xxx_data = [data.var_2xxx[5] & 0b01000000]

@@ -342,10 +342,6 @@ class PlayerStatsTab(QtWidgets.QWidget):
         main_layout.addWidget(stats)
 
         # --------------------------------------------------------
-
-        self.bowser_stats.setEnabled(False)
-
-        self.assign_sprites()
     
     def assign_rank_sprites(self, rank):
         tex = create_MObj_sprite(
@@ -406,6 +402,8 @@ class PlayerStatsTab(QtWidgets.QWidget):
                 self.parent.parent.lang)
 
             self.equipped_gear_boxes[gear[0]][gear[1]].setItemIcon(gear[2], item_sprite_cache[gear[3]])
+        
+        self.set_data()
     
     def change_data(self, player, stat, value):
         self.parent.set_edited(True)

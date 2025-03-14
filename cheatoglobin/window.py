@@ -18,9 +18,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lang = 1
         self.rng = choice([0, 1]), choice([0, 1])
 
-        self.has_rom = False
-        self.import_rom()
-
         menu_bar = self.menuBar()
         menu_bar_file = menu_bar.addMenu("&File")
         menu_bar_file.addAction(
@@ -44,6 +41,14 @@ class MainWindow(QtWidgets.QMainWindow):
             QtGui.QKeySequence.StandardKey.Quit,
             QtWidgets.QApplication.quit,
         )
+        menu_bar_config = menu_bar.addMenu("Config")
+        menu_bar_config.addAction(
+            "Choose ROM",
+            self.update_rom,
+        )
+
+        self.has_rom = False
+        self.startup()
 
         # ======================================================================================================================
 
@@ -67,6 +72,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if not self.import_files():
             sys.exit(2)
+
+        if self.has_rom:
+            self.file_1_tab.assign_sprites()
+            self.file_2_tab.assign_sprites()
     
     def import_files(self):
         file_path, _selected_filter = QtWidgets.QFileDialog.getOpenFileName(
@@ -214,12 +223,70 @@ class MainWindow(QtWidgets.QMainWindow):
                 backup_file = save_file.read(0x5F4)
                 save_file.seek(slot_offsets[current_slot] + 0x7EC)
                 save_file.write(backup_file)
+    
+    def startup(self):
+        if not os.path.exists(str(FILES_DIR / "rom_path_config.txt")):
+            QtWidgets.QMessageBox.information(
+                self,
+                "Choose a ROM",
+                f"This program can use a Bowser's Inside Story ROM to display graphics and text right from the game.\n\nIf you would like to use a ROM to enhance the program's graphics, please choose one now.\n\nThis can be changed at any time by using the \"Choose ROM\" option under the \"Config\" tab in the toolbar.",
+            )
+            self.choose_rom()
+        else:
+            with open(str(FILES_DIR / "rom_path_config.txt"), "r") as config:
+                self.ROM_path = config.readline()
 
-    def import_rom(self): # TO DO: make the user be able to import other ROMs or whatever, do what spritoglobin does
-        self.has_rom = True
+        if self.ROM_path != '':
+            self.import_rom()
+    
+    def choose_rom(self):
+        QtWidgets.QMessageBox.information(
+            self,
+            "Choose a ROM",
+            f"Please choose a Bowser's Inside Story ROM to open.\n\nAlternatively, hit \"Cancel\" to use no ROM.",
+        )
+        file_path, _selected_filter = QtWidgets.QFileDialog.getOpenFileName(
+            parent=self,
+            caption="Open ROM",
+            filter=NDS_ROM_FILENAME_FILTER,
+        )
+        self.ROM_path = file_path
 
-        path = "JPBISROM.nds"
+        with open(str(FILES_DIR / "rom_path_config.txt"), "w") as config:
+            config.write(self.ROM_path)
+    
+    def update_rom(self):
+        test = self.has_rom
+        self.choose_rom()
+        self.import_rom()
+
+        if test != self.has_rom:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Restart the Program",
+                f"Graphics will update next time the program is restarted.",
+            )
+
+        self.file_1_tab.assign_sprites()
+        self.file_2_tab.assign_sprites()
+
+    def import_rom(self):
+        if self.ROM_path == '':
+            self.has_rom = False
+            return
+
+        path = self.ROM_path
         rom = ndspy.rom.NintendoDSRom.fromFile(path)
+
+        if rom.name != b"MARIO&LUIGI3":
+            QtWidgets.QMessageBox.warning(
+            self,
+            "Invalid ROM",
+            f"The chosen ROM is not a valid Bowser's Inside Story ROM.\n\nPlease use the \"Config\" tab in the toolbar to choose a valid ROM.",
+            )
+            return
+
+        self.has_rom = True
 
         if rom.idCode[3] == 69 or rom.idCode[3] == 80:                                                               # US-base
             self.overlay_MObj = rom.loadArm9Overlays([132])[132].data

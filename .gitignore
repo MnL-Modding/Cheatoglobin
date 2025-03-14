@@ -175,7 +175,10 @@ poetry.toml
 
 # End of https://www.toptal.com/developers/gitignore/api/python
 
-
+# NDS files
 *.nds
 *.sav
 *.SaveRAM
+
+# config files
+rom_path_config.txt

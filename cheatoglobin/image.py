@@ -119,13 +119,16 @@ def create_XObj_sprite(table_offsets, file_data_overlay, group_data_overlay, XOb
 
     return QtGui.QPixmap(QtGui.QImage(ImageQt(img)))
 
-def define_palette(current_pal):
+# mode 0 is 2D, mode 1 is 3D
+def define_palette(current_pal, mode = 1):
     out_pal = []
     for color_raw in current_pal:
-        red = (color_raw & 0x1F) << 3
-        green = (color_raw >> 5 & 0x1F) << 3
-        blue = (color_raw >> 10 & 0x1F) << 3
-        out_pal.append((red, green, blue))
+        return_color = []
+        for i in range(3):
+            x = color_raw >> (i * 5) & 0x1F               # 15 bit color
+            x = (x << 1) + min(x, mode)                   # 18 bit color
+            return_color.append((x << 2) | (x >> 4))      # 24 bit color
+        out_pal.append(return_color)
     return out_pal
 
 def create_sprite_part(buffer_in, current_pal, part_xy, sprite_mode, pal_shift, swizzle, transparent_flag = True):

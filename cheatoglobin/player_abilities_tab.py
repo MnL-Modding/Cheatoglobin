@@ -314,8 +314,6 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
         padding = QtWidgets.QWidget()
         main_layout.addWidget(padding)
         padding.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
-        self.assign_sprites()
     
     def assign_badge_sprites(self, badges):
         tex = create_MObj_sprite(
@@ -392,6 +390,8 @@ class PlayerAbilitiesTab(QtWidgets.QWidget):
                 ability[0].setPixmap(tex)
                 ability[0].setFixedWidth(tex.width())
             index += 1
+        
+        self.set_data()
     
     def change_data(self, data_type, stat, value):
         self.parent.set_edited(True)

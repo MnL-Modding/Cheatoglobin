@@ -7,6 +7,7 @@ APP_NAME = "cheatoglobin"
 APP_DISPLAY_NAME = "Cheatoglobin"
 
 NDS_SAVE_FILENAME_FILTER = "NDS Save Files (*.sav *.SaveRAM);;All Files (*)"
+NDS_ROM_FILENAME_FILTER = "NDS ROMs (*.nds);;All Files (*)"
 
 PLAYER_NAMES = (
     "MARIO",

@@ -149,8 +149,6 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
         main_layout.addWidget(gear_counts)
 
         # --------------------------------------------------------
-
-        self.assign_sprites()
     
     def assign_sprites(self):
         if not self.has_rom:
@@ -179,6 +177,8 @@ class PlayerInventoryTab(QtWidgets.QScrollArea):
 
             item[0].setPixmap(item_sprite_cache[item[1]])
             item[0].setFixedWidth(item_sprite_cache[item[1]].width())
+        
+        self.set_data()
     
     def change_data(self, data_type, stat, value):
         self.parent.set_edited(True)
