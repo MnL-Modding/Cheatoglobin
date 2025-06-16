@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from functools import partial
 
-from cheatoglobin.image import create_MObj_sprite, create_FObj_sprite
+from cheatoglobin.image import create_MObj_sprite, create_FObj_sprite, create_BDataMap_image
 from cheatoglobin.constants import *
 
 class PlayerStatsTab(QtWidgets.QWidget):
@@ -340,6 +340,11 @@ class PlayerStatsTab(QtWidgets.QWidget):
             stats_layout.addWidget(player_stats)
         
         main_layout.addWidget(stats)
+
+        #for i in range(17):
+        #    test = QtWidgets.QLabel()
+        #    test.setPixmap(create_BDataMap_image(self.parent.parent.BDataMap_file, i))
+        #    stats_layout.addWidget(test)
 
         # --------------------------------------------------------
     

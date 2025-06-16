@@ -12,7 +12,7 @@ def create_MObj_sprite(table_offsets, overlay, MObj_file, group_num, anim_num, l
     if isinstance(anim_num, int):
         anim_list = [anim_num]
     else:
-        anim_list = [*anim_num]
+        anim_list = list(anim_num)
     return create_XObj_sprite(table_offsets, overlay, overlay, MObj_file, group_num, anim_list, lang)
 
 create_FObj_sprite = create_MObj_sprite
@@ -228,11 +228,6 @@ def create_MMap_image(MMap_file, mode, width, height, graphics_buffer_id, tilese
     MMap_file.seek(int.from_bytes(MMap_file.read(4), "little"))
     palette = define_palette(struct.unpack(f'<256H', MMap_file.read(0x200)))
 
-    with open("test.dat", "wb") as test:
-        MMap_file.seek(65 * 4)
-        MMap_file.seek(int.from_bytes(MMap_file.read(4), "little"))
-        test.write(decompress(MMap_file))
-
     # ==================================================================
     # start assembling the image
 
@@ -255,7 +250,7 @@ def create_MMap_image(MMap_file, mode, width, height, graphics_buffer_id, tilese
                             trans = 0
                         else:
                             trans = 0xFF
-                        buffer_colored.extend(palette[current_pix + ((tile >> 12) << 4)] + (trans,))
+                        buffer_colored.extend(palette[current_pix + ((tile >> 12) << 4)] + [trans])
                 case 1:
                     for j in range(64):
                         current_pix = buffer_raw[j]
@@ -263,7 +258,7 @@ def create_MMap_image(MMap_file, mode, width, height, graphics_buffer_id, tilese
                             trans = 0
                         else:
                             trans = 0xFF
-                        buffer_colored.extend(palette[current_pix] + (trans,))
+                        buffer_colored.extend(palette[current_pix] + [trans])
             
             tile_cache[tile & 0b1111001111111111] = Image.frombytes("RGBA", (8, 8), bytearray(buffer_colored))
         
@@ -278,5 +273,62 @@ def create_MMap_image(MMap_file, mode, width, height, graphics_buffer_id, tilese
             img_tile = ImageOps.flip(img_tile)
 
         img.paste(img_tile, ((i % width) * 8, (i // width) * 8), img_tile)
+
+    return QtGui.QPixmap(QtGui.QImage(ImageQt(img)))
+
+def create_BDataMap_image(BDataMap_file, map_id):
+    BDataMap_file = BytesIO(BDataMap_file)
+
+    # ==================================================================
+    # start reading the data
+
+    BDataMap_file.seek((map_id + 1) * 4)
+    BDataMap_file.seek(int.from_bytes(BDataMap_file.read(4), "little"))
+    base = BytesIO(decompress(BDataMap_file))
+
+    base.seek(0x0000)
+    tileset = BytesIO(base.read(0x500))
+
+    base.seek(0x0500)
+    palette = define_palette(struct.unpack(f'<256H', base.read(0x200)))
+
+    base.seek(0x06E0)
+    graphics_buffer = BytesIO(base.read())
+
+    # ==================================================================
+    # start assembling the image
+
+    tile_cache = {}
+    img = Image.new("RGBA", (32 * 8, 15 * 8))
+
+    for i in range(tileset.getbuffer().nbytes // 2):
+        tile = int.from_bytes(tileset.read(2), "little")
+
+        if tile & 0b1111001111111111 not in tile_cache:
+            graphics_buffer.seek((tile & 0x3FF) * 32)
+            buffer_raw = graphics_buffer.read(32)
+
+            buffer_colored = []
+            for j in range(64):
+                current_pix = (buffer_raw[j // 2] >> (4 * (j % 2))) & 0xF
+                if current_pix == 0:
+                    trans = 0
+                else:
+                    trans = 0xFF
+                buffer_colored.extend(palette[current_pix + ((tile >> 12) << 4)] + [trans])
+
+            tile_cache[tile & 0b1111001111111111] = Image.frombytes("RGBA", (8, 8), bytearray(buffer_colored))
+        
+        img_tile = tile_cache[tile & 0b1111001111111111]
+
+        x_flip = tile & 0b0000010000000000 != 0
+        y_flip = tile & 0b0000100000000000 != 0
+
+        if x_flip:
+            img_tile = ImageOps.mirror(img_tile)
+        if y_flip:
+            img_tile = ImageOps.flip(img_tile)
+
+        img.paste(img_tile, ((i % 32) * 8, (i // 32) * 8), img_tile)
 
     return QtGui.QPixmap(QtGui.QImage(ImageQt(img)))
