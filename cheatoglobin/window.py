@@ -2,7 +2,7 @@ import os
 import sys
 import struct
 from random import choice
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtMultimedia, QtWidgets
 import ndspy.rom
 
 from cheatoglobin.constants import *
@@ -14,6 +14,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle(f"No Currently Opened File - {APP_DISPLAY_NAME}")
         self.setWindowIcon(QtGui.QIcon(str(FILES_DIR / 'cheatoglobin.ico')))
+
+        self.success_sfx = QtMultimedia.QSoundEffect(self)
+        self.success_sfx.setSource(QtCore.QUrl.fromLocalFile(FILES_DIR / "cheatoglobin_success.wav"))
+        self.success_sfx.setVolume(0.3)
 
         self.lang = 1
         self.rng = choice([0, 1]), choice([0, 1])
@@ -223,6 +227,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 backup_file = save_file.read(0x5F4)
                 save_file.seek(slot_offsets[current_slot] + 0x7EC)
                 save_file.write(backup_file)
+
+        self.success_sfx.play()
+        QtWidgets.QMessageBox.about(
+            self,
+            "Save Successful",
+            f"Successfully saved file to:\n\n{self.ROM_path}",
+        )
     
     def startup(self):
         if not os.path.exists(str(FILES_DIR / "rom_path_config.txt")):
@@ -311,3 +322,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.FObj_file = rom.getFileByName('FObj/FObj.dat')
         self.FObjPc_file = rom.getFileByName('FObjPc/FObjPc.dat')
         self.BObjUI_file = rom.getFileByName('BObjUI/BObjUI.dat')
+        self.BDataMap_file = rom.getFileByName('BData/BDataMap.dat')
